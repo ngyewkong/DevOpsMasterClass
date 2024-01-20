@@ -101,7 +101,7 @@ Browse workspace for `.trx` files; now we need an MSTest plugin from the [catalo
 - search `trx`
 - check `MSTest` plugin details
 
-Back to Jenkins - _Manage Jenkins_ ... _Manage Plugins_
+Back to Jenkins UI -> Manage Jenkins -> Plugins -> Available Plugins
 
 - from `Available` tab
 - install MSTest
@@ -118,3 +118,47 @@ In `pi` job, add post-build step for MSTest
 > Build again & refresh job page
 
 - with multiple builds trend report at job level
+
+## Demo - Build in Docker
+
+### Publish
+
+Build Docker image and publish to Docker Hub; search for `Docker Hub` in [plugins](https://plugins.jenkins.io/).
+
+- main "Docker" most popular
+- but lots of dependencies and lots of features I don't need
+- try CloudBees Docker Build & Publish
+
+Back to Jenkins UI -> Manage Jenkins -> Plugins -> Available Plugins
+
+- from `Available` tab
+- install CloudBees Docker Build & Publish
+
+In `pi` job, add _build and publish_ step
+
+- repo: `your docker hub repo`
+- registry credentials - add new username/password creds
+- use Docker Hub username and [authentication token](https://hub.docker.com/settings/security)
+- advanced - Dockerfile path
+
+Build now - FAILS (Due to Docker not being installed on Jenkins vm)
+
+- Install Docker in the Jenkins Server
+
+  - apt install docker.io
+  - sudo usermod -a -G docker jenkins (add the jenkins user to the Docker group)
+  - sudo systemctl status jenkins (check status of jenkins)
+  - sudo systemctl restart jenkins (restart jenkins service)
+  - rebuild job in jenkins ui
+  - build will fail again during docker push (permission denied)
+    - fix: add a sh block in front to login to Docker Hub first
+
+- add build environment, hub creds:
+  - `DOCKER_HUB_USER`
+  - `DOCKER_HUB_PASSWORD`
+  - use the docker credentials saved in jenkins
+- add build step, before build & push
+
+```
+docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+```
