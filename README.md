@@ -162,3 +162,13 @@ Build now - FAILS (Due to Docker not being installed on Jenkins vm)
 ```
 docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
 ```
+
+## Demo - Offline Installation in Jenkins VM (install plugins directly in server)
+
+- cd /var/lib/jenkins/plugins
+- GitHub Plugin: wget https://updates.jenkins.io/download/plugins/github/1.37.3.1/github.hpi
+- MSTest Plugin: wget https://updates.jenkins.io/download/plugins/mstest/1.0.5/mstest.hpi
+- Docker Plugin: wget https://updates.jenkins.io/download/plugins/docker-build-publish/1.4.0/docker-build-publish.hpi
+- sudo systemctl restart jenkins
+- Note: this way of installing plugins WILL NOT HANDLE plugins dependencies...
+- Will need to handle it ourselves (be it through a bundle in an artifactory etc)
