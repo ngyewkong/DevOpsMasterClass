@@ -101,7 +101,7 @@ Browse workspace for `.trx` files; now we need an MSTest plugin from the [catalo
 - search `trx`
 - check `MSTest` plugin details
 
-Back to Jenkins - _Manage Jenkins_ ... _Manage Plugins_
+Back to Jenkins UI -> Manage Jenkins -> Plugins -> Available Plugins
 
 - from `Available` tab
 - install MSTest
@@ -118,3 +118,57 @@ In `pi` job, add post-build step for MSTest
 > Build again & refresh job page
 
 - with multiple builds trend report at job level
+
+## Demo - Build in Docker
+
+### Publish
+
+Build Docker image and publish to Docker Hub; search for `Docker Hub` in [plugins](https://plugins.jenkins.io/).
+
+- main "Docker" most popular
+- but lots of dependencies and lots of features I don't need
+- try CloudBees Docker Build & Publish
+
+Back to Jenkins UI -> Manage Jenkins -> Plugins -> Available Plugins
+
+- from `Available` tab
+- install CloudBees Docker Build & Publish
+
+In `pi` job, add _build and publish_ step
+
+- repo: `your docker hub repo`
+- registry credentials - add new username/password creds
+- use Docker Hub username and [authentication token](https://hub.docker.com/settings/security)
+- advanced - Dockerfile path
+
+Build now - FAILS (Due to Docker not being installed on Jenkins vm)
+
+- Install Docker in the Jenkins Server
+
+  - apt install docker.io
+  - sudo usermod -a -G docker jenkins (add the jenkins user to the Docker group)
+  - sudo systemctl status jenkins (check status of jenkins)
+  - sudo systemctl restart jenkins (restart jenkins service)
+  - rebuild job in jenkins ui
+  - build will fail again during docker push (permission denied)
+    - fix: add a sh block in front to login to Docker Hub first
+
+- add build environment, hub creds:
+  - `DOCKER_HUB_USER`
+  - `DOCKER_HUB_PASSWORD`
+  - use the docker credentials saved in jenkins
+- add build step, before build & push
+
+```
+docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+```
+
+## Demo - Offline Installation in Jenkins VM (install plugins directly in server)
+
+- cd /var/lib/jenkins/plugins
+- GitHub Plugin: wget https://updates.jenkins.io/download/plugins/github/1.37.3.1/github.hpi
+- MSTest Plugin: wget https://updates.jenkins.io/download/plugins/mstest/1.0.5/mstest.hpi
+- Docker Plugin: wget https://updates.jenkins.io/download/plugins/docker-build-publish/1.4.0/docker-build-publish.hpi
+- sudo systemctl restart jenkins
+- Note: this way of installing plugins WILL NOT HANDLE plugins dependencies...
+- Will need to handle it ourselves (be it through a bundle in an artifactory etc)
