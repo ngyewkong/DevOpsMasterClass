@@ -7,6 +7,7 @@ uc = Jenkins.instance.updateCenter
 pm.doCheckUpdatesServer()
 
 // List of PlugIn with Dependencies
+// the name inside the array follow the id listed in jenkins doc
 ["github", "mstest", "workflow-aggregator", "docker-build-publish"].each {
   if (! pm.getPlugin(it)) {
     deployment = uc.getPlugin(it).deploy(true)
