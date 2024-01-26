@@ -19,3 +19,5 @@ pm.doCheckUpdatesServer()
 
 // Restart Jenkins after installing plugins (optional)
 Jenkins.instance.restart()
+
+// go to Manage Jenkins > Script Console and run this script to install the plugins
