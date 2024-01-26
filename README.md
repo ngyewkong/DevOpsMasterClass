@@ -172,3 +172,5 @@ docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
 - sudo systemctl restart jenkins
 - Note: this way of installing plugins WILL NOT HANDLE plugins dependencies...
 - Will need to handle it ourselves (be it through a bundle in an artifactory etc)
+
+## Doing installation of plugins via pipeline jenkinsfile
