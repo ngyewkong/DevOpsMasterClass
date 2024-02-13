@@ -28,10 +28,11 @@ mkdir -p hello-world cd hello-world
 # Create a plugin from the Jenkins templates:
 
 mvn -U archetype:generate -Dfilter="io.jenkins.archetypes:"
-
 mvn verify mvn package
 
-Move .hpi file from targets to Jenkins Plugin Directory Retstart the Jenkins Service
+# Move .hpi file from targets to Jenkins Plugin Directory Restart the Jenkins Service
+
+mv hello-world.hpi /var/lib/jenkins/plugins/
 
 LogIn Jenkins and follow below steps -
 
