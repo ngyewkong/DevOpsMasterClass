@@ -172,3 +172,10 @@ docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
 - Will need to handle it ourselves (be it through a bundle in an artifactory etc)
 
 ## Doing installation of plugins via pipeline jenkinsfile
+
+### run this in sh console to allow jenkins to run shell sudo commands
+
+- sudo visudo
+- Now add the below lines in your sudoers file :
+- jenkins ALL=(ALL) NOPASSWD: ALL
+- service jenkins start

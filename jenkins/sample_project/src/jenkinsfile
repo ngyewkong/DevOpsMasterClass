@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+    stages {
+        stage('Verify Shell Environment') {
+            steps {
+                script {
+                    // Get the job name and build number
+                    def jobName = env.JOB_NAME
+                    def buildNumber = env.BUILD_NUMBER
+
+                    // Print the job name and build number
+                    echo "Job Name: $jobName"
+                    echo "Build Number: $buildNumber"
+
+                    // Use them in shell commands
+                    sh 'sudo docker --version'
+                    sh 'sudo dotnet --info'
+                }
+            }
+        }
+
+        stage('Checkout Git Repository') {
+            steps {
+                script {
+                    // Clone the Git repository's master branch
+                    def gitRepoUrl = 'https://github.com/ngyewkong/DevOpsMasterClass.git'
+
+                    checkout([$class: 'GitSCM', 
+                        branches: [[name: '*/master']], 
+                        userRemoteConfigs: [[url: gitRepoUrl]], 
+                        extensions: [[$class: 'CleanBeforeCheckout'], [$class: 'CloneOption', noTags: false, shallow: true, depth: 1]]
+                    ])
+                }
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                sh 'chmod +x ./jenkins/ci/01-build.sh && ./jenkins/ci/01-build.sh'
+            }
+        }
+
+        stage('Unit Test') {
+            steps {
+                sh 'chmod +x ./jenkins/ci/02-unit-test.sh && ./jenkins/ci/02-unit-test.sh'
+                mstest testResultsFile:"**/*.trx"
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Get the job name and build number
+                    def jobName = env.JOB_NAME
+                    def buildNumber = env.BUILD_NUMBER
+
+                    // Print the job name and build number
+                    echo "Job Name: $jobName"
+                    echo "Build Number: $buildNumber"
+                
+                withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {                      
+                    sh "chmod +x ./jenkins/ci/03-push.sh"
+                    sh "./jenkins/ci/03-push.sh $buildNumber"
+                }
+                echo "Build Completed - Job Name: $jobName  --  Build Number: $buildNumber"
+            }
+        }
+    }
+}
+}
