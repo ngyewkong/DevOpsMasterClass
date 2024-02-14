@@ -1,6 +1,7 @@
 pipeline {
-    
+    // setting the agent (can use labels to set which nodes to use)
     agent any
+    // set the env vars
     environment {
         RELEASE='20.04'
     }
