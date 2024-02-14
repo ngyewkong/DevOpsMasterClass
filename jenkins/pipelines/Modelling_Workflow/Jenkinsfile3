@@ -8,6 +8,7 @@ pipeline {
             environment {
                 LOG_LEVEL='INFO'
             }
+            // parallel block with 3 build stages with diff os architecture
             parallel {
                 stage('linux-arm64') {
                     agent any
