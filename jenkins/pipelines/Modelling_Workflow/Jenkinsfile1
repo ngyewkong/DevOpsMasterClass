@@ -1,15 +1,17 @@
 pipeline {
     // setting the agent (can use labels to set which nodes to use)
     agent any
-    // set the env vars
+    // set the env vars for all stages
     environment {
-        RELEASE='20.04'
+        RELEASE='20.04';
+        LOG_LEVEL='INFO'
     }
 
     stages {
 
         stage('Build') {
             agent any
+            // only scoped to the stage the env is defined in 
             environment {
                 LOG_LEVEL='INFO'
             }
