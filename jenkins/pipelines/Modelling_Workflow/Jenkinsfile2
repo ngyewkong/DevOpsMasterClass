@@ -19,6 +19,7 @@ pipeline {
             }
         }
         stage('Deploy') {
+            // input block give manual user maker checker to approve or reject the stage
             input {
                 message 'Deploy?'
                 ok 'Do it!'
