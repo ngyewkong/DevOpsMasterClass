@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        RELEASE_VERSION = '1.1.0'
+        RELEASE_VERSION = '1.6.7'
         INT_VERSION = 'R2'
     }
     stages {
@@ -22,7 +22,7 @@ pipeline {
 
         stage('Unit Test') {
             steps {
-                dir('./java-tomcat-sample') {
+                dir('./jenkins/java-tomcat-sample') {
                     sh '''
                         echo "Executing Unit Tests..."
                         mvn test
@@ -38,7 +38,7 @@ pipeline {
             steps {
                 echo "Building version: ${INT_VERSION} with suffix: ${VERSION_SUFFIX}"
                 echo 'Mention your Application Build Code here!!!'
-                dir('./java-tomcat-sample') {
+                dir('./jenkins/java-tomcat-sample') {
                         sh '''
                             mvn versions:set -DnewVersion="${VERSION_SUFFIX}"-SNAPSHOT
                             mvn versions:update-child-modules
