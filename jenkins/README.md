@@ -179,3 +179,18 @@ docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
 - Now add the below lines in your sudoers file :
 - jenkins ALL=(ALL) NOPASSWD: ALL
 - service jenkins start
+
+## Jenkins Architecture
+
+- Master - Slaves nodes
+  - Master: Admin Node
+    - Host the Web UI
+    - Firing Jobs
+    - Storing Job Data
+  - Slaves: Execution Nodes
+    - Linux Machines, Wintel Machines, ARM64/x86 Machines
+    - Build different projects with different slaves
+    - Con: Need multiple slaves for specific environment
+    - Con: High Infra Cost
+    - Con: Difficulty in Maintenance
+    - Con: Failure in Agent will fail ALL BUILDS running on the slave agent.
