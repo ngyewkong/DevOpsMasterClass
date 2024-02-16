@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        RELEASE_VERSION = '1.1.0'
+        RELEASE_VERSION = '1.6.7'
         INT_VERSION = 'R2'
     }
     stages {
@@ -22,7 +22,7 @@ pipeline {
 
         stage('Unit Test') {
             steps {
-                dir('./java-tomcat-sample') {
+                dir('./jenkins/java-tomcat-sample') {
                     sh '''
                         echo "Executing Unit Tests..."
                         mvn test
@@ -36,9 +36,10 @@ pipeline {
                 VERSION_SUFFIX = "${sh(script:'if [ "${RELEASE}" = false ] ; then echo -n "${INT_VERSION}"ci:"${BUILD_NUMBER}"; else echo -n "${RELEASE_VERSION}":"${BUILD_NUMBER}"; fi', returnStdout: true)}"
             }
             steps {
+                // check if params is being passed in (true or false for release)
                 echo "Building version: ${INT_VERSION} with suffix: ${VERSION_SUFFIX}"
                 echo 'Mention your Application Build Code here!!!'
-                dir('./java-tomcat-sample') {
+                dir('./jenkins/java-tomcat-sample') {
                         sh '''
                             mvn versions:set -DnewVersion="${VERSION_SUFFIX}"-SNAPSHOT
                             mvn versions:update-child-modules
@@ -49,11 +50,14 @@ pipeline {
         }
 
         stage('Publish') {
+            // when release param is true -> Publish stage to archive artifacts will execute
+            // else will skip this stage
             when {
                 expression { return params.RELEASE }
             }
 
             steps {
+                // publish specific artifact war file
                 archiveArtifacts('**/*.war')
             }
         }
@@ -61,6 +65,7 @@ pipeline {
 
     post {
         always {
+            // cleanup the jenkins node workspace of all the files
             cleanWs()
         }
     }

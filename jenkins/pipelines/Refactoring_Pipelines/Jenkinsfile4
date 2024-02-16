@@ -12,13 +12,14 @@ pipeline {
     stages {
         stage('Audit tools') {
             steps {
+                // using a function in the same pipeline file
                 auditTools()
             }
         }
 
         stage('Unit Test') {
             steps {
-                dir('./java-tomcat-sample') {
+                dir('./jenkins/java-tomcat-sample') {
                     sh '''
                         echo "Executing Unit Tests..."
                         mvn test
@@ -34,7 +35,8 @@ pipeline {
             steps {
                 echo "Building version: ${INT_VERSION} with suffix: ${VERSION_SUFFIX}"
                 echo 'Mention your Application Build Code here!!!'
-                dir('./java-tomcat-sample') {
+                dir('./jenkins/java-tomcat-sample') {
+                    // using function for reusability
                     packageApplication()
                 }
             }
