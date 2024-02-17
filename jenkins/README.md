@@ -231,3 +231,13 @@ docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
 
 5. Execute Docker using root User-
    args '-u root'
+
+## Run Jenkins Container with Docker on VM
+
+1. Install Docker Engine (follow doc from dockerhub)
+2. sudo docker run -p 8080:8080 --name jenkins-container jenkins/jenkins:lts
+3. State Persistence using Mounts
+   - set a dir to store jenkins data (eg. mkdir /root/jenkins_data)
+   - docker run -d -p 80:8080 --name jenkins-container -u root -v /root/jenkins_data/jenkins_home:/var/jenkins_home -u root jenkins/jenkins:lts (use root to run as docker do not have permission to access root/jenkins_data/jenkins_home to write logs to the location)
+   - cat secrets/initialAdminPassword (to get the password to login to jenkins on first setup)
+   - jenkins plugins and jobs are persisted after mounting vm volume to docker container
