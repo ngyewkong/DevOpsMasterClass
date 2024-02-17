@@ -272,3 +272,11 @@ docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
     - Activate the Role-Based Strategy by using the standard Manage Jenkins > Configure Global Security screen
     - Create new role to assign to users (eg read-only role for view access only)
     - Assign role to an user (eg add test-user to read-only role)
+
+## Jenkins ENV Variables
+
+- GLOBAL Built In ENV var (http://jenkins-ip:port/env-vars.html/)
+  - eg BUILD_ID, WORKSPACE, BUILD_URL, GIT_BRANCH etc
+- Custom ENV var
+  - Manage Jenkins -> System -> Global Properties
+    - Add your own custom global ENV var (key:value pair)
