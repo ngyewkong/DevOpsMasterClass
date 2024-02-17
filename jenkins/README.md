@@ -259,3 +259,16 @@ docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
   - setup Docker Agent Templates (for build stages that requires a different env)
     - set label, name, image, instance capacity, set root for user
     - can setup multiple agents (java/node/py buid env) with multiple agent templates
+
+## Jenkins Security
+
+- Manage sign in/out (in Manage Jenkins -> Security)
+  - can also allow users to sign up (not recommended as the sign up user has full admin credentials)
+- Install Security Plugin (Role-Based Authorization Strategy Plugin) https://plugins.jenkins.io/role-strategy/
+  - RBAC (create roles and assign roles to different users)
+  - Create User (to create a new user)
+    - New user do not have any privileges
+  - Assign roles
+    - Activate the Role-Based Strategy by using the standard Manage Jenkins > Configure Global Security screen
+    - Create new role to assign to users (eg read-only role for view access only)
+    - Assign role to an user (eg add test-user to read-only role)
