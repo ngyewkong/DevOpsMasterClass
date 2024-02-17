@@ -241,3 +241,21 @@ docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
    - docker run -d -p 80:8080 --name jenkins-container -u root -v /root/jenkins_data/jenkins_home:/var/jenkins_home -u root jenkins/jenkins:lts (use root to run as docker do not have permission to access root/jenkins_data/jenkins_home to write logs to the location)
    - cat secrets/initialAdminPassword (to get the password to login to jenkins on first setup)
    - jenkins plugins and jobs are persisted after mounting vm volume to docker container
+
+## Setup Jenkins Docker Agent
+
+- docker run -d -p 8080:8080 -p 50000:50000 -v /root/jenkins_home:/var/jenkins_home -u root --name jenkins-container jenkins/jenkins:lts
+  - the second port is for Docker slave communicstion (port 50000)
+- Install Docker Plugin & docker restart jenkins-container (restart the container)
+- Setup cloud (to configure the setup for Docker agent executors)
+  - docker host: unix:///var/run/docker.sock (for linux/unix machines)
+  - Connection Error:
+    - Resolution Steps:
+      - sudo systemctl disable firewalld (Disable Firewall if enabled)
+      - sudo systemctl enable --now docker (Enable docker on restart)
+      - sudo usermod -aG docker jenkins (Add jenkins user to the docker user group)
+      - sudo chmod 666 /var/run/docker.sock (change permission read/write to the dir)
+      - docker run -d -p 8080:8080 -p 50000:50000 --privileged=true -v /root/jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock -u root --name jenkins-container jenkins/jenkins:lts (set additional privileged flag to true & additonal volume mount for the var/run/docker.sock)
+  - setup Docker Agent Templates (for build stages that requires a different env)
+    - set label, name, image, instance capacity, set root for user
+    - can setup multiple agents (java/node/py buid env) with multiple agent templates
