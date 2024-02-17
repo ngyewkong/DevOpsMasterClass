@@ -183,6 +183,7 @@ docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
 ## Jenkins Architecture
 
 - Master - Slaves nodes
+
   - Master: Admin Node
     - Host the Web UI
     - Firing Jobs
@@ -194,6 +195,21 @@ docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
     - Con: High Infra Cost
     - Con: Difficulty in Maintenance
     - Con: Failure in Agent will fail ALL BUILDS running on the slave agent.
+
+- Setup
+  - login as root user to both master and slave agents via ssh
+  - switch to jenkins user on master agent (jenkins use jenkins user to communicate with slave agents)
+  - setup up ssh between agents without passwords (using pub & priv keys)
+    - ssh-keygen -t rsa in master agent
+    - ssh root@slave-agent-ip mkdir -p .ssh (create .ssh folder in slave agent - requires slave agent root user password)
+    - cat /var/lib/jenkins/.ssh/id_rsa.pub | ssh root@slave-agent-ip 'cat >> .ssh/authorized_keys' (copy the public key from master agent to slave agent .ssh/authorized_keys folder)
+    - test ssh connection from master to slave (without password)
+    - in slave agent -> mkdir bin and cd bin
+    - wget http://master-agent:8080/jnlpJars/slave.jar (to get the slave.jar from master agent onto slave agent)
+    - install java on slave agent (need to run slave.jar)
+    - install Command-Launcher plugin in master agent
+      - choose launch agent via execution of command on the controller in launch method
+        - ssh root@slave-agent-ip java -jar /root/bin/slave.jar (set this in launch command)
 
 ## Using Docker for Jenkins Pipelines
 
@@ -215,3 +231,13 @@ docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
 
 5. Execute Docker using root User-
    args '-u root'
+
+## Run Jenkins Container with Docker on VM
+
+1. Install Docker Engine (follow doc from dockerhub)
+2. sudo docker run -p 8080:8080 --name jenkins-container jenkins/jenkins:lts
+3. State Persistence using Mounts
+   - set a dir to store jenkins data (eg. mkdir /root/jenkins_data)
+   - docker run -d -p 80:8080 --name jenkins-container -u root -v /root/jenkins_data/jenkins_home:/var/jenkins_home -u root jenkins/jenkins:lts (use root to run as docker do not have permission to access root/jenkins_data/jenkins_home to write logs to the location)
+   - cat secrets/initialAdminPassword (to get the password to login to jenkins on first setup)
+   - jenkins plugins and jobs are persisted after mounting vm volume to docker container

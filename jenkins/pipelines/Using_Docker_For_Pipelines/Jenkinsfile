@@ -1,6 +1,7 @@
 pipeline {
     agent {
         // defining agent to use Docker with maven image
+        // args '-u root' -> run docker agent with root user (for dl of m2 repo dependencies)
         docker {
             image 'maven:latest'
             args '-u root'
