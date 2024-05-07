@@ -34,3 +34,18 @@
 - docker network rm dns_bridge (for not in use networks)
 - docker network prune (remove all custom networks not used by at least 1 container)
 - docker network connect dns_bridge [container_name]
+
+## Docker Image Layers & Tags
+
+- Docker will check layer by layer if there is an existing cache version of the layer available on local before pulling
+- save bandwidth during download or upload of the Docker image
+- tag -> releaase/variant
+- can be explicitly tagged as well
+
+## Useful CLI Commands
+
+- docker images
+- docker pull image_name:tag (eg. redis:6.2)
+- docker history image_name:tag (get the history/how the image is built/size of each layer etc)
+- docker tag wordpress:latest local_wordpress:1.0.0 (retag an image to another copy)
+- docker push your_registry_username/image_name (after docker login, the image in local must follow your_registry_name/image_name as well)
