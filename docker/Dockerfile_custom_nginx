@@ -1,0 +1,21 @@
+# take ubuntu os as base image layer
+FROM ubuntu:latest
+
+LABEL version="0.0.1"
+LABEL maintainer="ngyewkong"
+
+# update image to the latest packages 
+RUN apt-get update && apt-get upgrade -y
+
+# install nginx on ubuntu
+RUN apt-get install nginx -y
+
+# expose port 80 (since nginx use port 80)
+EXPOSE 80
+
+# command to start up nginx in the container
+CMD ["nginx", "-g", "daemon off;"]
+
+# to run docker build using a non-standard Dockerfile filename
+# docker build -t custom-nginx:0.0.1 . -f "Dockerfile_custom_nginx"
+# docker inspect custom-nginx:0.0.1

@@ -49,3 +49,52 @@
 - docker history image_name:tag (get the history/how the image is built/size of each layer etc)
 - docker tag wordpress:latest local_wordpress:1.0.0 (retag an image to another copy)
 - docker push your_registry_username/image_name (after docker login, the image in local must follow your_registry_name/image_name as well)
+
+## Dockerfile
+
+## FROM Base Layer (Reference Base Image)
+
+FROM baseImageName:tag
+
+## Label (to organise images by project, record licensing information etc) using Key-Value Pairs
+
+"\" to handle multi-line annotations
+LABEL com.example.version="0.01=beta" \
+ org.opencontainers.image.author='MariaDBCommunity' \
+
+## RUN (execute commands in a new layer on top of the current image and commit the results)
+
+eg after pulling base image and we want to download certain packages/dependencies into the image for use ltr on
+Install wget/curl to download the dependencies
+Download the artifacts
+Can run shell commands as well
+
+RUN apt-get update
+RUN apt-get install -y curl
+
+## CMD (to run the software contained by your image along with any arguments)
+
+Only one CMD instruction per Dockerfile (only the last CMD will take effect if there is more than 1 CMD)
+Usually the last operation in the Dockerfile
+
+CMD["executable","param1","param2"]
+
+## EXPOSE (ports on which a container is listening for connections)
+
+EXPOSE portNumber
+
+## ENV (sets the environment variable to the value)
+
+eg use ENV to update the PATH env variable for the software the container installs
+
+## ADD (copies new files/directories from src & add to filesystem of image at dest path)
+
+ADD hom\* /mydir/ (this will add all files starting with "hom")
+
+## VOLUME (used to expose any db storage area, configuration storage or files/folders created by your docker container)
+
+## WORKDIR (sets the working directory for RUN, CMD, ADD commands used in the Dockerfile)
+
+## Build Docker Image
+
+- docker build -t imageName:TagName dir-containing-the-dockerfile
