@@ -98,3 +98,40 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 ## Build Docker Image
 
 - docker build -t imageName:TagName dir-containing-the-dockerfile
+
+## Docker Volumes - Persistent Data
+
+- During Volume creation, it is stored within a directory on the Docker host machine.
+- Created and managed by containers
+- Can be set in Dockerfile using VOLUME keyword
+
+## Useful CLI Commands
+
+- docker inspect imageName eg docker inspect mysql
+  - eg Volume being specified in mysql image ("/var/lib/mysql": {})
+- docker inspect containerName eg docker inspect mysqldb
+  - in Mounts section,the source (location on docker machine) and destination (location in container) are being specified
+  - "Source": "/var/lib/docker/volumes/d1bea13b56874e802845f1f5c919bef3faadd018f83b116928bb494f3e05924b/\_data" (anon volumes)
+  - "Destination": "/var/lib/mysql"
+- docker volume ls to show volumes created
+- stopping a container will not remove the volume
+- setting custom volume using --mount flag
+  - docker run -d --name mysqldb3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True --mount source=mysql-db,destination=/var/lib/mysql mysql
+  - can reuse this volume if we need to restart or start another container
+
+## Bind Mounts
+
+- Bind Mount means a file or dir on the host machine mounted into a container
+- Mapping of Host Machine files into container files
+- Non-Docker processes on the host machine can modify the files on the bind mounts anytime unlike Docker Volumes which only Docker processes can modify
+- Bind Mounts cannot be added in Dockerfile (as it is a hardcoded location on the host machine) unlike Docker Volumes
+- good use case for bind mounts:
+  - sharing of configuration files from host machine to containers
+  - sharing source code or build artifacts btw a dev env on a Docker host and a container
+
+## Useful CLI Commands
+
+- impt the type,soruce,target do not have spaces in btw
+- docker container run -d --name nginx --mount type=bind,source=$(pwd),target=/app nginx
+- docker exec --it containerName bash
+- in the /app it is mapped to the pwd when the docker container was created with all the files on the filesystem
