@@ -101,6 +101,11 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 
 ## Docker Volumes - Persistent Data
 
+- Containers are immutable - Once deployed can only redeploy not able to make changes on the container
+- Containers are Stateless - refresh or restart will override the existing state of the container back to the default (data lost)
+- By default, all files created inside a container are stored on a writable container layer
+- Data does not persist when container no longer exists, hard to get data out of the container if another process needs it
+- Docker gt two solns: store files in host machine either using volumes or bind mounts
 - During Volume creation, it is stored within a directory on the Docker host machine.
 - Created and managed by containers
 - Can be set in Dockerfile using VOLUME keyword
@@ -116,7 +121,8 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 - docker volume ls to show volumes created
 - stopping a container will not remove the volume
 - setting custom volume using --mount flag
-  - docker run -d --name mysqldb3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True --mount source=mysql-db,destination=/var/lib/mysql mysql
+  - docker run -d --name mysqldb3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True --mount source=mysql-db,destination=/var/lib/mysql mysql (using --mount)
+  - docker run -d --name mysqldb3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v mysql-db:/var/lib/mysql mysql (using -v)
   - can reuse this volume if we need to restart or start another container
 
 ## Bind Mounts
@@ -132,6 +138,31 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 ## Useful CLI Commands
 
 - impt the type,soruce,target do not have spaces in btw
-- docker container run -d --name nginx --mount type=bind,source=$(pwd),target=/app nginx
+- docker run -d -p 1234:80 --name nginx --mount type=bind,source=$(pwd),target=/app,readonly nginx (using --mount)
+- docker run -d -p 4321:80 --name nginx -v /"$(pwd)":/app:ro nginx (using -v)
 - docker exec --it containerName bash
 - in the /app it is mapped to the pwd when the docker container was created with all the files on the filesystem
+
+## Docker Compose
+
+- Single Command for all Image building and Container creation
+- Docker Compose is not production ready feature (Docker Swarm is)
+- Simulate production deployment scenario on dev machine
+- requires a docker-compose.yml file containing all services, networks & volumes for the entire app stack
+
+## Useful CLI Commands
+
+- can use docker compose instead of docker-compose in newer versions of Docker (docker-compose is compatible in newer versions)
+- make sure the commands are run in the folder containing the docker-compose.yml file
+- docker-compose version
+- docker-compose --help
+- docker-compose build
+- docker-compose up -d
+- docker-compose down
+- docker-compose push
+- docker-compose -f custom-application.yml up -d (to use different filename apart from the convention)
+- docker-compose logs
+- docker-compose logs serviceName (eg docker-compose logs mongodb)
+- docker-compose -f custom-application.yml logs mongodb --tail=5 (show only the last x log output)
+- docker-compose -f custom-application.yml logs node-app --follow (follow the container live log output)
+- docker-compose -f custom-application.yml exec -it node-app bash (get into shell of the container)

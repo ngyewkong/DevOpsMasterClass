@@ -1,0 +1,13 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+WORKDIR /app
+
+ARG APP_NAME
+ENV APP_NAME=${APP_NAME}
+
+ENV ENVIRONMENT=development
+
+COPY . .
+
+CMD ["node", "app.js"]
