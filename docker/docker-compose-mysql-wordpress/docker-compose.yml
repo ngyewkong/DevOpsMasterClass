@@ -1,0 +1,46 @@
+services:
+  # mysql db service
+  mysql:
+    image: mysql:8.0
+    container_name: mysqldb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpressadmin
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - wordpress-network
+    ports:
+      - "3306:3306"
+
+  # wordpress frontend service
+  wordpress:
+    # use to ensure container is only up if the upstream dep is also up
+    depends_on:
+      - mysql
+    image: wordpress:latest
+    container_name: wordpress-container
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: wordpressadmin
+      WORDPRESS_DB_PASSWORD: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    ports:
+      - "9080:80"
+    networks:
+      - wordpress-network
+
+# define the required volumes & network here
+# this section is actually creating the volumes and networks
+volumes:
+  mysql_data:
+  wordpress_data:
+
+networks:
+  wordpress-network:
+    driver: bridge

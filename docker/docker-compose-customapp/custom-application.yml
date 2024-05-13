@@ -1,0 +1,15 @@
+services:
+  node-app:
+    build:
+      context: .
+    ports:
+    - "3000:3000"
+    depends_on:
+    - mongodb
+    image: ngyewkong/custom_nodeapp:1.0
+
+  # this service name is being used in app.js to connect to mongodb
+  mongodb:
+    image: mongo:latest
+    ports:
+    - "27017:27017"

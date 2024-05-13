@@ -98,3 +98,71 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 ## Build Docker Image
 
 - docker build -t imageName:TagName dir-containing-the-dockerfile
+
+## Docker Volumes - Persistent Data
+
+- Containers are immutable - Once deployed can only redeploy not able to make changes on the container
+- Containers are Stateless - refresh or restart will override the existing state of the container back to the default (data lost)
+- By default, all files created inside a container are stored on a writable container layer
+- Data does not persist when container no longer exists, hard to get data out of the container if another process needs it
+- Docker gt two solns: store files in host machine either using volumes or bind mounts
+- During Volume creation, it is stored within a directory on the Docker host machine.
+- Created and managed by containers
+- Can be set in Dockerfile using VOLUME keyword
+
+## Useful CLI Commands
+
+- docker inspect imageName eg docker inspect mysql
+  - eg Volume being specified in mysql image ("/var/lib/mysql": {})
+- docker inspect containerName eg docker inspect mysqldb
+  - in Mounts section,the source (location on docker machine) and destination (location in container) are being specified
+  - "Source": "/var/lib/docker/volumes/d1bea13b56874e802845f1f5c919bef3faadd018f83b116928bb494f3e05924b/\_data" (anon volumes)
+  - "Destination": "/var/lib/mysql"
+- docker volume ls to show volumes created
+- stopping a container will not remove the volume
+- setting custom volume using --mount flag
+  - docker run -d --name mysqldb3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True --mount source=mysql-db,destination=/var/lib/mysql mysql (using --mount)
+  - docker run -d --name mysqldb3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v mysql-db:/var/lib/mysql mysql (using -v)
+  - can reuse this volume if we need to restart or start another container
+
+## Bind Mounts
+
+- Bind Mount means a file or dir on the host machine mounted into a container
+- Mapping of Host Machine files into container files
+- Non-Docker processes on the host machine can modify the files on the bind mounts anytime unlike Docker Volumes which only Docker processes can modify
+- Bind Mounts cannot be added in Dockerfile (as it is a hardcoded location on the host machine) unlike Docker Volumes
+- good use case for bind mounts:
+  - sharing of configuration files from host machine to containers
+  - sharing source code or build artifacts btw a dev env on a Docker host and a container
+
+## Useful CLI Commands
+
+- impt the type,soruce,target do not have spaces in btw
+- docker run -d -p 1234:80 --name nginx --mount type=bind,source=$(pwd),target=/app,readonly nginx (using --mount)
+- docker run -d -p 4321:80 --name nginx -v /"$(pwd)":/app:ro nginx (using -v)
+- docker exec --it containerName bash
+- in the /app it is mapped to the pwd when the docker container was created with all the files on the filesystem
+
+## Docker Compose
+
+- Single Command for all Image building and Container creation
+- Docker Compose is not production ready feature (Docker Swarm is)
+- Simulate production deployment scenario on dev machine
+- requires a docker-compose.yml file containing all services, networks & volumes for the entire app stack
+
+## Useful CLI Commands
+
+- can use docker compose instead of docker-compose in newer versions of Docker (docker-compose is compatible in newer versions)
+- make sure the commands are run in the folder containing the docker-compose.yml file
+- docker-compose version
+- docker-compose --help
+- docker-compose build
+- docker-compose up -d
+- docker-compose down
+- docker-compose push
+- docker-compose -f custom-application.yml up -d (to use different filename apart from the convention)
+- docker-compose logs
+- docker-compose logs serviceName (eg docker-compose logs mongodb)
+- docker-compose -f custom-application.yml logs mongodb --tail=5 (show only the last x log output)
+- docker-compose -f custom-application.yml logs node-app --follow (follow the container live log output)
+- docker-compose -f custom-application.yml exec -it node-app bash (get into shell of the container)
