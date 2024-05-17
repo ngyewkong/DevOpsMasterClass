@@ -166,3 +166,84 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 - docker-compose -f custom-application.yml logs mongodb --tail=5 (show only the last x log output)
 - docker-compose -f custom-application.yml logs node-app --follow (follow the container live log output)
 - docker-compose -f custom-application.yml exec -it node-app bash (get into shell of the container)
+
+## Docker Swarm - Container Orchestration Tool
+
+- Task Scheduling
+- Load Balancing
+- Rolling Updates
+- Security
+- Scaling of containers
+- Managing failing or crashed containers
+- Perform upgrade of service container with 0 downtime
+- Manage containers on different VMs, Nodes
+- Docker Swarm is clustering and scheduling tool for Docker Containers
+- Orchestration: Deine nodes. Define services. Set how many nodes you want to run and where
+- Docker Swarm have 2 types of nodes: Master Node and Worker Node
+- Every Swarm starts with one manager node designated as the leader
+- Highly available due to its impl of RAFT algo
+- Consensus algo to achieve fault tolerance in distributed sys
+  - Leader is constantly checking with its fellow managers nodes ans sync their states
+- Nodes and Roles: Each RAFT cluster have multiple nodes with the following roles
+  - Leader: one leader at a time
+  - Follower: replicate the leader actions
+  - Candidate
+- Leader Election:
+  - All nodes start in the follower state
+  - Follower do not receive Leader communication for a certain period (election timeout)
+  - This Follower transits into a Candidate state and requests for votes from other nodes to become the next Leader
+  - If Candidate receives majority votes, it become the new Leader
+- Swarm Terminology:
+  - Swarm consists of multiple Docker hosts in swarm mode and act as 1. managers (manage membership & delegation) & 2. workers (running the swarm services)
+  - Host: Can be a manager, worker or both
+  - Service: Define its optimal state (number of replicas, network & storage resources available, ports the service expose to external)
+  - Docker Swarm will maintain the Service Desired State (5 replicas set -> it will always maintain 5 running services)
+  - Task: A running container which is part of a swarm service & managed by a swarm manager
+    - Carry Docker container & commands to run inside the container
+    - Once a Task is assigned to a node, it cannot be moved to another node. Can only run on the assigned node or fail.
+  - Nodes: Instance of Docker engine participating in Swarm
+  - Submit Service definition to the manager node which will dispatch tasks to worker nodes.
+  - Manager node will perform the orchestration & cluster mgmt to maintain the desired state of the swarm
+  - Worker nodes receive & execute the tasks from manager node
+  - Load Balancing
+    - Swarm manager uses the internal load balancing called the ingress load balancing to expose the services you want to make available externally to the swarm
+    - External Load Balancers (eg cloud load balancers) can access service on the published port of ANY node in the cluster (whether or not the node is running the task for the service)
+    - All nodes in the swarm cluster route ingress connections to a running task instance
+
+## Docker Swarm Initialisation
+
+- to check if the node has initalised swarm
+  - docker info
+  - Swarm: inactive
+- at the node execute
+  - docker swarm init
+    - always choose the public IP address on server VMs with public & private IP addresses.
+    - docker swarm init --advertise-addr PUBLIC_IP_ADD
+    - the node that executed the swarm init will always be the manager node
+      - sample log: Swarm initialized: current node (some node id) is now a manager.
+- to add worker node to this swarm cluster
+  - docker swarm join --token some-generated-token IP_ADD_OF_MANAGER_NODE
+- to add manager node to this cluster
+  - docker swarm join-token manager
+- to get a list of commands available
+  - docker swarm --help
+  - docker service --help
+
+## Useful CLI Commands
+
+- docker service ls (show the list of services)
+- docker service create imageName commandToRun
+  - docker service create alpine ping www.google.com
+- docker service ps nameOfService (to show the container)
+- docker service update nameOfService --replicas 5 (scaling up the service to 5 replicas)
+- even if you run docker container rm -f on one of the container
+- it will spin up another container to replace automatically to maintain 5 replicas
+  - NAME IMAGE NODE DESIRED STATE CURRENT STATE ERROR PORTS
+  - inspiring_pascal.1 alpine:latest docker-desktop Running Running 2 hours ago
+  - inspiring_pascal.2 alpine:latest docker-desktop Running Running about a minute ago
+  - inspiring_pascal.3 alpine:latest docker-desktop Running Running about a minute ago
+  - inspiring_pascal.4 alpine:latest docker-desktop Ready Ready 4 seconds ago
+  - \_ inspiring_pascal.4 alpine:latest docker-desktop Shutdown Failed 4 seconds ago "task: non-zero exit (137)"
+  - inspiring_pascal.5 alpine:latest docker-desktop Running Running about a minute ago
+- docker service inspect nameOfService (to get info abt the service eg how many replicas)
+- docker service rollback nameOfService (will rollback to prev deployment of 1 replica)
