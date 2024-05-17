@@ -282,3 +282,19 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 - go to the docker-manager-01 IP and hit on port 8090 (where the visualizer service is being run)
 - docker service create --name nginx_service --replicas 30 nginx:alpine (create service with a custom name)
 - docker service ps nginx_service (will see the containers running on each node)
+
+## Docker Swarm Network
+
+- Docker Swarm use overlay network
+  - creates a distributed network among multiple Docker hosts
+  - allow containers to communicate inside the single swarm cluster
+- When init a swarm cluster or join a Docker host to an existing swarm
+  - 2 new networks on created on the Docker host
+    - Ingress (Default): Overlay network which handles control and data traffic related to swarm services
+      - if Swarm service is not connected to a user-defined Overlay Network, it will connect to Ingress Network
+    - Bridge: docker_gwbridge: connects individual Docker node to other nodes particpating in the Swarm
+  - User-defined Overlay Network
+    - TCP port 2377 for cluster mgmt communications
+    - TCP & UDP port 7946 for communications among nodes
+    - UDP port 4789 for overlay network traffic
+  - Before creating user defined overlay network, docker Swarm must be init on Node or join to existing Swarm cluster
