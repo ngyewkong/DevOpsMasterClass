@@ -1,0 +1,14 @@
+services:
+  visualizer:
+    # the image is using the dockerhub community image
+    image: dockersamples/visualizer
+    container_name: swarm-visualizer
+    ports:
+      - "8090:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints:
+          # the service will only execute on manager nodes and not on worker nodes
+          - "node.role == manager"

@@ -247,3 +247,38 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
   - inspiring_pascal.5 alpine:latest docker-desktop Running Running about a minute ago
 - docker service inspect nameOfService (to get info abt the service eg how many replicas)
 - docker service rollback nameOfService (will rollback to prev deployment of 1 replica)
+
+- free docker swarm online lab (to make use of multiple distributed nodes across diff VMs)
+
+  - https://labs.play-with-docker.com/
+  - comes with docker installed & ssh is provided ootb
+  - can use the docker templates to spin up nodes for swarm
+  - docker node ls (must run from manager node to see the nodes info)
+  - cat /etc/os-release (check the os of the node)
+
+- Setup Docker Swarm for Production
+  - eg spin up 4 VMs (1 manager + 3 worker)
+  - ssh into manager VM (install docker + init swarm)
+    - follow docker doc to install
+      - https://docs.docker.com/engine/install/ubuntu/
+    - docker info
+    - Add user to Docker Group
+      - sudo usermod -aG docker someUsername
+    - docker swarm init --advertise-addr VM_PUBLIC_IP
+  - Install Docker CE on all the worker nodes
+    - docker swarm join-token worker/manager (generate the token for adding worker/manager to the swarm cluster)
+    - docker swarm join --token workerToken/managerToken MANAGER_NODE_PUBLIC_IP
+    - Manager nodes can promote worker nodes, worker nodes cannot promote self or other worker nodes
+      - docker node promote docker-02 (have to run from existing manager/leader nodes)
+      - docker node demote docker-01
+      - docker service create --replicas 10 alpine ping www.google.com (can be run in any manager node)
+
+## Docker Swarm Visualizer
+
+- dockersamples/visualizer
+- require a docker-compose.yaml file
+- docker stack deploy -c docker-compose.yml serviceName
+- docker stack ls
+- go to the docker-manager-01 IP and hit on port 8090 (where the visualizer service is being run)
+- docker service create --name nginx_service --replicas 30 nginx:alpine (create service with a custom name)
+- docker service ps nginx_service (will see the containers running on each node)
