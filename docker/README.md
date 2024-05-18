@@ -298,3 +298,12 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
     - TCP & UDP port 7946 for communications among nodes
     - UDP port 4789 for overlay network traffic
   - Before creating user defined overlay network, docker Swarm must be init on Node or join to existing Swarm cluster
+
+## Docker Swarm Nerwork Lab
+
+- docker network create -d overlay lab_network
+- docker service create --name postgres --network lab_network -e POSTGRES_PASSWORD=somepassword postgres (postgresql db)
+- docker service create --name drupal --network lab_network -p 8080:80 drupal (frontend)
+- postgres & drupal will be running on different nodes (docker02 & docker-01)
+- upodate the drupal config page to use postgres (setting the password set during service creation & hostname to use postgres serviceName)
+- however drupal can be accessed on port 8080 of the docker-manager-01 ip add or any other nodes IP addresses in the same swarm cluster
