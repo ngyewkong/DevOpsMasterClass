@@ -307,3 +307,4 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 - postgres & drupal will be running on different nodes (docker02 & docker-01)
 - upodate the drupal config page to use postgres (setting the password set during service creation & hostname to use postgres serviceName)
 - however drupal can be accessed on port 8080 of the docker-manager-01 ip add or any other nodes IP addresses in the same swarm cluster
+  - this also mean ports cannot overlap when executing services in the same Docker Swarm cluster
