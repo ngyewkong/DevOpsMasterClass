@@ -137,7 +137,7 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 
 ## Useful CLI Commands
 
-- impt the type,soruce,target do not have spaces in btw
+- impt the type,source,target do not have spaces in btw
 - docker run -d -p 1234:80 --name nginx --mount type=bind,source=$(pwd),target=/app,readonly nginx (using --mount)
 - docker run -d -p 4321:80 --name nginx -v /"$(pwd)":/app:ro nginx (using -v)
 - docker exec --it containerName bash
