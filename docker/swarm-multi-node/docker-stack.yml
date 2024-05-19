@@ -1,0 +1,62 @@
+services:
+  vote:
+    image: dockersamples/examplevotingapp_vote
+    deploy:
+      mode: replicated
+      replicas: 4
+    container_name: vote-svc
+    networks:
+    - frontend
+    ports:
+    - "5000:80"
+  redis:
+    image: redis:alpine
+    deploy:
+      mode: replicated
+      replicas: 4
+    container_name: redis-svc
+    networks:
+    - frontend
+  worker:
+    image: dockersamples/examplevotingapp_worker
+    deploy:
+      mode: replicated
+      replicas: 4
+    container_name: worker-svc
+    networks:
+    - frontend
+    - backend
+  db:
+    image: postgres:15-alpine
+    deploy:
+      mode: replicated
+      replicas: 1
+    container_name: db-svc
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+    networks:
+    - backend
+    volumes: # bind mount
+    - db-data:/var/lib/postgresql/data
+  result:
+    image: dockersamples/examplevotingapp_result
+    deploy:
+      mode: replicated
+      replicas: 1
+    container_name: result-svc
+    networks:
+    - backend
+    ports:
+    - "5001:80"
+
+
+# create overlay networks
+networks:
+  frontend:
+    driver: overlay
+  backend:
+    driver: overlay
+
+# create named volumes
+volumes:
+  db-data:

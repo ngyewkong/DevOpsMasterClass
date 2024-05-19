@@ -308,3 +308,13 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 - upodate the drupal config page to use postgres (setting the password set during service creation & hostname to use postgres serviceName)
 - however drupal can be accessed on port 8080 of the docker-manager-01 ip add or any other nodes IP addresses in the same swarm cluster
   - this also mean ports cannot overlap when executing services in the same Docker Swarm cluster
+
+## Docker Swarm Service Traffic Management
+
+- Swarm Global Traffic Mgmt is related to "Routing Mesh" handled by Swarm internal Load Balancer
+- Swarm publish Services on some ports and allow external to access this services (Ingress Routing Mesh)
+  - This routing mesh allows each node in the swarm cluster to accept connections on published ports for any service running in the swarm cluster
+  - Even if there is no task running on that node
+  - Routing mesh routes all incoming req to published ports on available nodes to an active container
+    - Routing mesh listens on published port for any IP add assigned to the node
+- docker service inspect --format="{{.Endpoint.Spec.Ports}}" serviceName to check service published port
