@@ -137,7 +137,7 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 
 ## Useful CLI Commands
 
-- impt the type,soruce,target do not have spaces in btw
+- impt the type,source,target do not have spaces in btw
 - docker run -d -p 1234:80 --name nginx --mount type=bind,source=$(pwd),target=/app,readonly nginx (using --mount)
 - docker run -d -p 4321:80 --name nginx -v /"$(pwd)":/app:ro nginx (using -v)
 - docker exec --it containerName bash
@@ -166,3 +166,162 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 - docker-compose -f custom-application.yml logs mongodb --tail=5 (show only the last x log output)
 - docker-compose -f custom-application.yml logs node-app --follow (follow the container live log output)
 - docker-compose -f custom-application.yml exec -it node-app bash (get into shell of the container)
+
+## Docker Swarm - Container Orchestration Tool
+
+- Task Scheduling
+- Load Balancing
+- Rolling Updates
+- Security
+- Scaling of containers
+- Managing failing or crashed containers
+- Perform upgrade of service container with 0 downtime
+- Manage containers on different VMs, Nodes
+- Docker Swarm is clustering and scheduling tool for Docker Containers
+- Orchestration: Deine nodes. Define services. Set how many nodes you want to run and where
+- Docker Swarm have 2 types of nodes: Master Node and Worker Node
+- Every Swarm starts with one manager node designated as the leader
+- Highly available due to its impl of RAFT algo
+- Consensus algo to achieve fault tolerance in distributed sys
+  - Leader is constantly checking with its fellow managers nodes ans sync their states
+- Nodes and Roles: Each RAFT cluster have multiple nodes with the following roles
+  - Leader: one leader at a time
+  - Follower: replicate the leader actions
+  - Candidate
+- Leader Election:
+  - All nodes start in the follower state
+  - Follower do not receive Leader communication for a certain period (election timeout)
+  - This Follower transits into a Candidate state and requests for votes from other nodes to become the next Leader
+  - If Candidate receives majority votes, it become the new Leader
+- Swarm Terminology:
+  - Swarm consists of multiple Docker hosts in swarm mode and act as 1. managers (manage membership & delegation) & 2. workers (running the swarm services)
+  - Host: Can be a manager, worker or both
+  - Service: Define its optimal state (number of replicas, network & storage resources available, ports the service expose to external)
+  - Docker Swarm will maintain the Service Desired State (5 replicas set -> it will always maintain 5 running services)
+  - Task: A running container which is part of a swarm service & managed by a swarm manager
+    - Carry Docker container & commands to run inside the container
+    - Once a Task is assigned to a node, it cannot be moved to another node. Can only run on the assigned node or fail.
+  - Nodes: Instance of Docker engine participating in Swarm
+  - Submit Service definition to the manager node which will dispatch tasks to worker nodes.
+  - Manager node will perform the orchestration & cluster mgmt to maintain the desired state of the swarm
+  - Worker nodes receive & execute the tasks from manager node
+  - Load Balancing
+    - Swarm manager uses the internal load balancing called the ingress load balancing to expose the services you want to make available externally to the swarm
+    - External Load Balancers (eg cloud load balancers) can access service on the published port of ANY node in the cluster (whether or not the node is running the task for the service)
+    - All nodes in the swarm cluster route ingress connections to a running task instance
+
+## Docker Swarm Initialisation
+
+- to check if the node has initalised swarm
+  - docker info
+  - Swarm: inactive
+- at the node execute
+  - docker swarm init
+    - always choose the public IP address on server VMs with public & private IP addresses.
+    - docker swarm init --advertise-addr PUBLIC_IP_ADD
+    - the node that executed the swarm init will always be the manager node
+      - sample log: Swarm initialized: current node (some node id) is now a manager.
+- to add worker node to this swarm cluster
+  - docker swarm join --token some-generated-token IP_ADD_OF_MANAGER_NODE
+- to add manager node to this cluster
+  - docker swarm join-token manager
+- to get a list of commands available
+  - docker swarm --help
+  - docker service --help
+
+## Useful CLI Commands
+
+- docker service ls (show the list of services)
+- docker service create imageName commandToRun
+  - docker service create alpine ping www.google.com
+- docker service ps nameOfService (to show the container)
+- docker service update nameOfService --replicas 5 (scaling up the service to 5 replicas)
+- even if you run docker container rm -f on one of the container
+- it will spin up another container to replace automatically to maintain 5 replicas
+  - NAME IMAGE NODE DESIRED STATE CURRENT STATE ERROR PORTS
+  - inspiring_pascal.1 alpine:latest docker-desktop Running Running 2 hours ago
+  - inspiring_pascal.2 alpine:latest docker-desktop Running Running about a minute ago
+  - inspiring_pascal.3 alpine:latest docker-desktop Running Running about a minute ago
+  - inspiring_pascal.4 alpine:latest docker-desktop Ready Ready 4 seconds ago
+  - \_ inspiring_pascal.4 alpine:latest docker-desktop Shutdown Failed 4 seconds ago "task: non-zero exit (137)"
+  - inspiring_pascal.5 alpine:latest docker-desktop Running Running about a minute ago
+- docker service inspect nameOfService (to get info abt the service eg how many replicas)
+- docker service rollback nameOfService (will rollback to prev deployment of 1 replica)
+
+- free docker swarm online lab (to make use of multiple distributed nodes across diff VMs)
+
+  - https://labs.play-with-docker.com/
+  - comes with docker installed & ssh is provided ootb
+  - can use the docker templates to spin up nodes for swarm
+  - docker node ls (must run from manager node to see the nodes info)
+  - cat /etc/os-release (check the os of the node)
+
+- Setup Docker Swarm for Production
+  - eg spin up 4 VMs (1 manager + 3 worker)
+  - ssh into manager VM (install docker + init swarm)
+    - follow docker doc to install
+      - https://docs.docker.com/engine/install/ubuntu/
+    - docker info
+    - Add user to Docker Group
+      - sudo usermod -aG docker someUsername
+    - docker swarm init --advertise-addr VM_PUBLIC_IP
+  - Install Docker CE on all the worker nodes
+    - docker swarm join-token worker/manager (generate the token for adding worker/manager to the swarm cluster)
+    - docker swarm join --token workerToken/managerToken MANAGER_NODE_PUBLIC_IP
+    - Manager nodes can promote worker nodes, worker nodes cannot promote self or other worker nodes
+      - docker node promote docker-02 (have to run from existing manager/leader nodes)
+      - docker node demote docker-01
+      - docker service create --replicas 10 alpine ping www.google.com (can be run in any manager node)
+
+## Docker Swarm Visualizer
+
+- dockersamples/visualizer
+- require a docker-compose.yaml file
+- docker stack deploy -c docker-compose.yml serviceName
+- docker stack ls
+- go to the docker-manager-01 IP and hit on port 8090 (where the visualizer service is being run)
+- docker service create --name nginx_service --replicas 30 nginx:alpine (create service with a custom name)
+- docker service ps nginx_service (will see the containers running on each node)
+
+## Docker Swarm Network
+
+- Docker Swarm use overlay network
+  - creates a distributed network among multiple Docker hosts
+  - allow containers to communicate inside the single swarm cluster
+- When init a swarm cluster or join a Docker host to an existing swarm
+  - 2 new networks on created on the Docker host
+    - Ingress (Default): Overlay network which handles control and data traffic related to swarm services
+      - if Swarm service is not connected to a user-defined Overlay Network, it will connect to Ingress Network
+    - Bridge: docker_gwbridge: connects individual Docker node to other nodes particpating in the Swarm
+  - User-defined Overlay Network
+    - TCP port 2377 for cluster mgmt communications
+    - TCP & UDP port 7946 for communications among nodes
+    - UDP port 4789 for overlay network traffic
+  - Before creating user defined overlay network, docker Swarm must be init on Node or join to existing Swarm cluster
+
+## Docker Swarm Nerwork Lab
+
+- docker network create -d overlay lab_network
+- docker service create --name postgres --network lab_network -e POSTGRES_PASSWORD=somepassword postgres (postgresql db)
+- docker service create --name drupal --network lab_network -p 8080:80 drupal (frontend)
+- postgres & drupal will be running on different nodes (docker02 & docker-01)
+- upodate the drupal config page to use postgres (setting the password set during service creation & hostname to use postgres serviceName)
+- however drupal can be accessed on port 8080 of the docker-manager-01 ip add or any other nodes IP addresses in the same swarm cluster
+  - this also mean ports cannot overlap when executing services in the same Docker Swarm cluster
+
+## Docker Swarm Service Traffic Management
+
+- Swarm Global Traffic Mgmt is related to "Routing Mesh" handled by Swarm internal Load Balancer
+- Swarm publish Services on some ports and allow external to access this services (Ingress Routing Mesh)
+  - This routing mesh allows each node in the swarm cluster to accept connections on published ports for any service running in the swarm cluster
+  - Even if there is no task running on that node
+  - Routing mesh routes all incoming req to published ports on available nodes to an active container
+    - Routing mesh listens on published port for any IP add assigned to the node
+- docker service inspect --format="{{.Endpoint.Spec.Ports}}" serviceName to check service published port
+
+## Docker Swarm Stack
+
+- Stack is a grp of interrelated services that share dep & can be orchestrated & scaled tgt
+- Single stack is capable of defining & coordinating the functionality of the entire app
+- Complex apps can have multiple stacks
+- Follows the Docker Compose yaml format and complements the Swarm-specific properties for svc deployments
