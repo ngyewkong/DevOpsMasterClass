@@ -318,3 +318,10 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
   - Routing mesh routes all incoming req to published ports on available nodes to an active container
     - Routing mesh listens on published port for any IP add assigned to the node
 - docker service inspect --format="{{.Endpoint.Spec.Ports}}" serviceName to check service published port
+
+## Docker Swarm Stack
+
+- Stack is a grp of interrelated services that share dep & can be orchestrated & scaled tgt
+- Single stack is capable of defining & coordinating the functionality of the entire app
+- Complex apps can have multiple stacks
+- Follows the Docker Compose yaml format and complements the Swarm-specific properties for svc deployments
