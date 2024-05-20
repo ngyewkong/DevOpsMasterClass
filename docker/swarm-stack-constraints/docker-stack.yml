@@ -1,0 +1,11 @@
+services:
+  mysqkDB:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: "somePassword"
+      MYSQL_DATABASE: "testDB"
+    deploy:
+      replicas: 2
+      placement:
+        constraints:
+        - node.labels.region == east-1-d # assuming the node is alr labelled

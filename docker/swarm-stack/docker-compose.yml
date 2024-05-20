@@ -1,0 +1,29 @@
+services:
+  # Service Name -> Web
+  web:
+    # Pull Image from dockerhub
+    image: ngyewkong/web_app:1.0
+    # Command used to deploy the Service
+    deploy:
+      # Run 5 instances of that image as a service called web
+      # increase or decrease number of replicas (vertical scaling)
+      replicas: 5
+      resources:
+        # Limiting each one to use, at most, 10% of a single core of CPU time and 50MB of RAM.
+        # Increasing or decreasing cpu or memory (horizontal scaling)
+        limits:
+          cpus: "0.1"
+          memory: 50M
+      # Immediately restart containers if one fails.
+      restart_policy:
+        condition: on-failure
+    # Map ports (external:container)
+    ports:
+      - "4000:80"
+    # Define default network
+    networks:
+      - webnet
+# set network driver to overlay
+networks:
+  webnet:
+    driver: overlay

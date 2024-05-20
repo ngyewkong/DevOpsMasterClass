@@ -325,3 +325,74 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 - Single stack is capable of defining & coordinating the functionality of the entire app
 - Complex apps can have multiple stacks
 - Follows the Docker Compose yaml format and complements the Swarm-specific properties for svc deployments
+
+## Docker Swarm Secrets Management
+
+- secrets trasmitted over TLS
+- RAFT handles the secrets across nodes
+- containers work on mounted decrypted secrets, store at /run/secrets/secretName in containers
+- Users can update the service to grant it access to additional secrets or revoke its access at any time
+- when container task stops running, the decrypted secrets shared to it are unmounted from the in-mem filesystem for that container and flushed from the node's mem
+
+## Useful CLI Commands
+
+- docker secret--help
+- docker secret create secretName
+- docker secret inspect secretName
+- docker secret ls
+- docker secret rm secretName
+
+# Creating secrets through a file
+
+- 2 ways to create secrets (by file or by cli)
+- docker secret create secretName fileName
+- echo "secret_string" | docker secret create secretName -
+- will generate an id to ref
+- docker secret inspect cliPassword -> this will not expost the actual secret value
+- both are not the right approach
+  - first approach whoever has access to the host machine will have access to the secrets file
+  - second approach whoever access history command can also access the credentials
+- btr approach (create the secrets and pass it in):
+  - docker service create --name serviceName --secret db_username --secret db_password -e POSTGRES_PASSWORD_FILE=/run/secrets/db_password -e POSTGRES_USER_FILE=/run/secrets/db_username imageName:tag
+
+## Docker Swarm Service Management
+
+- Zero Downtime Service Upgrade
+- possible due to the rolling upgrade approach
+- examples of service upgrade:
+
+  - enhance the version of the deployed service: docker service update --image imageName serviceName
+  - update the stack file: docker stack deploy -c yamlFile serviceName
+
+- docker service create -p 80:8000 --name web_server nginx:1.14.2
+- upgrade vertically: docker service scale web_server=10 (execute 10 replicas)
+- update the service to nginx 1.15.12: docker service update --image nginx:1.15.12 web_server (rolling update)
+- change configuration of ports: docker service update --publish-rm 8000 --publish-add 9090:80 web_server
+
+- Health Checks: checking health of the resources (monitoring)
+- docker has inbuilt functionality to check container health
+- add in Dockerfile: HEALTHCHECK option CMD command: the command that checks the container health check
+  - --interval=someInterval: default is 30s
+  - --timeout=someInterval: default is 30s (fail health check if timeout is exceeded)
+  - --retries=numberOfTries: default is 3 (if health check fails a specific number of times, container health is regarded as unhealthy)
+  - --start-period=someInterval: default is 0s (Init time of app startup. Failed health check during startup is not counted)
+- docker container run -d --name postgresDB --health-cmd="pg_isready -U postgres || exit 1" postgres
+
+- Container Placement in Docker Swarm
+- Docker Swarm will automatically try and place the containers to provide max resiliency within the service cluster
+- however for certain cases, container need to be ran on certain nodes only
+  - eg. monitoring app that monitor the health of manager nodes -> this container will need to be ran on manager nodes only
+- Service Constraints: used to control the nodes a service can be assigned to
+  - can be added during creation time
+  - add/remove at update time
+- multiple constraints can be assigned to a single service
+- supports key or key-value pair
+- docker run -it -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock dockersamples/visualizer
+- docker service create --name nginx --constraint node.role==worker --replicas=10 nginx
+- add label on any node and define the constraints
+  - docker node update --label-add=region=east-1-d nodeValue(can be id or hostname)
+  - docker service create --constraint=node.labels.region=east-1-d imageName
+  - docker node inspect nodeValue (in the Spec can see the Labels)
+- remove constraints & add new constraints on running service
+  - docker service update --constraint-rm=node.labels.region=east-1-d --constraint-add node.role==manager serviceName
+- docker stack deploy -c docker-stack.yml stackName (to apply service constraints set in yml file)
