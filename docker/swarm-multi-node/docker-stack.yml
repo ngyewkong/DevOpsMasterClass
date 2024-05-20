@@ -1,10 +1,12 @@
+# this will not work for docker-compose only docker swarm stack
+# as multiple replicas will try to bind to the same port
+
 services:
   vote:
     image: dockersamples/examplevotingapp_vote
     deploy:
       mode: replicated
       replicas: 4
-    container_name: vote-svc
     networks:
     - frontend
     ports:
@@ -14,7 +16,6 @@ services:
     deploy:
       mode: replicated
       replicas: 4
-    container_name: redis-svc
     networks:
     - frontend
   worker:
@@ -31,7 +32,6 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-    container_name: db-svc
     environment:
       POSTGRES_PASSWORD: "postgres"
     networks:
@@ -43,7 +43,6 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-    container_name: result-svc
     networks:
     - backend
     ports:

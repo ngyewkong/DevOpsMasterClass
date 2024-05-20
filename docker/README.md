@@ -325,3 +325,32 @@ ADD hom\* /mydir/ (this will add all files starting with "hom")
 - Single stack is capable of defining & coordinating the functionality of the entire app
 - Complex apps can have multiple stacks
 - Follows the Docker Compose yaml format and complements the Swarm-specific properties for svc deployments
+
+## Docker Swarm Secrets Management
+
+- secrets trasmitted over TLS
+- RAFT handles the secrets across nodes
+- containers work on mounted decrypted secrets, store at /run/secrets/secretName in containers
+- Users can update the service to grant it access to additional secrets or revoke its access at any time
+- when container task stops running, the decrypted secrets shared to it are unmounted from the in-mem filesystem for that container and flushed from the node's mem
+
+## Useful CLI Commands
+
+- docker secret--help
+- docker secret create secretName
+- docker secret inspect secretName
+- docker secret ls
+- docker secret rm secretName
+
+# Creating secrets through a file
+
+- 2 ways to create secrets (by file or by cli)
+- docker secret create secretName fileName
+- echo "secret_string" | docker secret create secretName -
+- will generate an id to ref
+- docker secret inspect cliPassword -> this will not expost the actual secret value
+- both are not the right approach
+  - first approach whoever has access to the host machine will have access to the secrets file
+  - second approach whoever access history command can also access the credentials
+- btr approach (create the secrets and pass it in):
+  - docker service create --name serviceName --secret db_username --secret db_password -e POSTGRES_PASSWORD_FILE=/run/secrets/db_password -e POSTGRES_USER_FILE=/run/secrets/db_username imageName:tag
