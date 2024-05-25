@@ -42,6 +42,56 @@
 ## Installation
 
 - HA deployment (1 Master 2 Slaves)
+
+  - setup using kubeadm
+
+    - ssh into master node
+      - follow doc https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
+      - sudo apt-get update
+      - sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+      - curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      - echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+      - sudo apt-get update
+      - sudo apt-get install -y kubelet kubeadm kubectl
+      - sudo apt-mark hold kubelet kubeadm kubectl
+      - cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
+      - overlay
+      - br_netfilter
+      - EOF
+      - sudo modprobe overlay
+      - sudo modprobe br_netfilter
+      - cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
+      - net.bridge.bridge-nf-call-iptables = 1
+      - net.ipv4.ip_forward = 1
+      - net.bridge.bridge-nf-call-ip6tables = 1
+      - EOF
+      - sudo sysctl --system
+      - sudo apt-get update && sudo apt-get install -y containerd
+      - sudo mkdir -p /etc/containerd
+      - containerd config default | sudo tee /etc/containerd/config.toml
+      - sudo systemctl restart containerd
+      - sudo systemctl status containerd
+    - initialize k8s control plane (with an IP range)
+      - kubeadm init --pod-network-cidr=192.168.0.0/16
+    - setup kubeconfig on the machine (regular user)
+      - mkdir -p $HOME/.kube
+      - sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+      - sudo chown \$(id -u):\$(id -g) $HOME/.kube/config
+    - setup kubeconfig on the machine (root user)
+      - export KUBECONFIG=/etc/kubernetes/admin.conf
+    - deploy pod network
+      - kubectl apply -f podnetwork.yaml (refer to https://kubernetes.io/docs/concepts/cluster-administration/addons/)
+      - kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/tigera-operator.yaml (using calico)
+      - kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/custom-resources.yaml
+      - watch kubectl get pods -n calico-system (check if calico is up)
+      - kubectl get pods --all-namespaces
+      - kubectl get nodes -o wide
+    - to get the join token for worker node
+      - kubeadm token create --print-join-command
+    - install kubeadm on worker nodes (follow above installation steps used in master node)
+    - join worker nodes to cluster using kubeadm (ssh into worker nodes and execute)
+      - kubeadm join MasterNodeIP:6443 --token someautogentoken --discovery-token-ca-cert-hash sha256:someSHA
+
 - Single Node deployment (MiniKube k8s cluster)
   - Install Docker (Follow the docker docs)
   - Install kubectl (https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
