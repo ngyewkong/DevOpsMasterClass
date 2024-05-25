@@ -109,3 +109,25 @@
     - External etcd
       - each master node control plane only have the kube-api-server & other components
       - setup another node or another cluster for etcd server
+
+## K8s Management Tools
+
+- kubectl
+  - official k8s cli
+  - the other way is the rest api
+- kubeadm
+  - used to create k8s cluster
+- minikube
+  - k8s dev tool
+  - help to setup k8s cluster in a single node quickly for dev work
+- helm
+  - k8s template and package mgmt tool
+  - ability to convert k8s objects into reusable templates
+  - ability to provide complex multi-config templates with cross connectivity (interdependency)
+- kompose
+  - tranlates docker compose files into k8s object
+  - ability to ship docker containers to k8s
+- kustomize
+  - configuration mgmt tool for k8s obj config
+  - similar to helm
+  - ability to create reusable templates for k8s
