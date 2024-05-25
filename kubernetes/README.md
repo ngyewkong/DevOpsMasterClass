@@ -88,6 +88,7 @@
       - kubectl get nodes -o wide
     - to get the join token for worker node
       - kubeadm token create --print-join-command
+      - kubeadm token list (get list of generated tokens)
     - install kubeadm on worker nodes (follow above installation steps used in master node)
     - join worker nodes to cluster using kubeadm (ssh into worker nodes and execute)
       - kubeadm join MasterNodeIP:6443 --token someautogentoken --discovery-token-ca-cert-hash sha256:someSHA
