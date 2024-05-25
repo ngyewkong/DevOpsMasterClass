@@ -96,3 +96,16 @@
     - kubectl create namespace dev
 - kubeadm (cluster setup tool for following best practices k8s cluster creation)
   - --config to pass a custom config file
+
+## Cluster Management
+
+- App HA in k8s cluster
+  - Infra HA
+  - Cluster HA
+    - Need MULTIPLE Control Planes (Master Nodes)
+    - Need Load Balancer to communicate among multiple control planes & worker nodes will also comm to the load balancer
+    - Stacked etcd (more popular model)
+      - each master node has their own etcd server
+    - External etcd
+      - each master node control plane only have the kube-api-server & other components
+      - setup another node or another cluster for etcd server
