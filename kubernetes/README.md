@@ -182,3 +182,25 @@
   - configuration mgmt tool for k8s obj config
   - similar to helm
   - ability to create reusable templates for k8s
+
+## Maintenance Windows in K8s
+
+- remove node from cluster
+
+  - node draining
+    - removing a node from cluster in service
+    - app shld not be impacted by this process (no downtime)
+    - containers running on that node will be gracefully shutdown and rescheduled to another available node
+    - use kubectl to drain a node
+      - kubectl drain nodeName
+  - ignore daemon sets (if DaemonSet (pods that are tied to eeach node) is running in k8s cluster)
+    - when there are requirements to execute particular process on eg. all worker nodes (monitoring process on worker)
+      - kubectl drain nodeName --ignore-daemonsets
+    - pods that are executed on this drained node will not be rescheduled on another available node
+    - deployment that are excuted on multiple nodes will be rescheduled on availble node (i.e k8s-worker-03)
+  - uncordoning a node (after upgrade/patch)
+    - if node is still part of the cluster & want to allow pods on that particular node
+    - basically allowing master node to schedule the additional resources in that particular node
+      - kubectl uncordon nodeName
+    - does not guarantee that existing rescheduled pods will execute again on the uncordoned node
+    - workaround is to drain the other worker node and uncordon the other worker node
