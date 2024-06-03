@@ -204,3 +204,17 @@
       - kubectl uncordon nodeName
     - does not guarantee that existing rescheduled pods will execute again on the uncordoned node
     - workaround is to drain the other worker node and uncordon the other worker node
+
+## Upgrade K8s Cluster (to sync the cluster with latest k8s release)
+
+- upgrade with kubeadm
+- master node (control plane) upgrade
+  - drain the control plane node
+  - plan the upgrade using kubeadm upgrade plan command
+  - apply the plan
+  - upgrade kubectl & kubelet on control plane node
+- worker node upgrade (do not need to create plan and apply plan for worker node)
+  - drain the node
+  - upgrade kubeadm
+  - upgrade kubelet config
+  - upgrade kubectl & kubelet
