@@ -218,3 +218,20 @@
   - upgrade kubeadm
   - upgrade kubelet config
   - upgrade kubectl & kubelet
+
+## K8s Object Management (kubectl)
+
+- kubectl is the command line tool for k8s
+- internally use k8s rest api to carryout the commands
+- to get objects present in the k8s cluster
+  - kubectl get object_type object_name -o output_filename --sort-by JSONpath --selector selectorName
+- to get detailed info abt the k8s object
+  - kubectl describe object_type object_name
+- create any k8s object (if referencing a file, the file needs to be in yaml)
+  - kubectl create -f file_name.yaml
+- similar to create but allow overriding of existing objects (create will fail on existing objects)
+  - kubectl apply -f file_name.yaml
+- delete k8s object from the cluster
+  - kubectl delete object_type object_name
+- to execute any commands inside the running container
+  - kubectl exec pod_name -c container_name
