@@ -235,3 +235,13 @@
   - kubectl delete object_type object_name
 - to execute any commands inside the running container
   - kubectl exec pod_name -c container_name
+
+## K8s RBAC (Role-Based Access Management)
+
+- admin access is too much access for most use cases
+- RBAC Objects in k8s (deine set of permissions eg. read/write access)
+  - ClusterRoles (define permission across the cluster. not limited to specific namespace scope)
+  - ClusterBinding (Obj connects ClusterRoles to Users)
+  - Roles (define permission within namespace)
+  - RileBinding (Obj connects Roles to user)
+  - Binding is many-to-many relationships
