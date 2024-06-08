@@ -245,3 +245,15 @@
   - Roles (define permission within namespace)
   - RileBinding (Obj connects Roles to user)
   - Binding is many-to-many relationships
+
+## ServiceAccounts in K8s Cluster
+
+- ServiceAccount is used by container process to authenticate with k8s apis
+- eg. monitoring tool that need to interact with k8s apis, will need to create ServiceAccount on those pods for access
+- If pods need to communicate with k8s apis, user need to setup ServiceAccount to control the access
+- can be created using yaml manifest file
+  - namespace field is optional (specify namespace -> scoped to namespace level if not cluster level)
+- will need Binding (RoleBinding/ClusterRoleBinding)
+  - ServiceAccount access is also managed by RBAC
+  - Bind ServiceAccounts with ClusterRole or ClusterRoleBinding to provide access to Cluster APIs
+  - in the manifest, set kind RoleBinding or ClusterRoleBinding, set a ServiceAccount kind under "subjects" field

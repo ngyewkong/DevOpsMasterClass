@@ -79,3 +79,21 @@
   - kubectl run nginx --image=nginx -n development
 - Verify there is pod running in development namespace
   - kubectl get po --context=DevUser-context
+
+## ServiceAccount demo
+
+1. Check for Service Accounts
+
+- kubectl get serviceaccounts -n development/ kubectl get sa
+
+2. Create Service Account manifest
+
+- vim my-serviceaccount.yaml
+
+3. Create the Service Account (create a sa in development namespace)
+
+- kubectl apply -f my-serviceaccount.yaml
+
+4. Verify RoleBinding is created (sa-pod-reader)
+
+- kubectl get rolebinding -n development
