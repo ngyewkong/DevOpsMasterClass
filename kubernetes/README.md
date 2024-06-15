@@ -257,3 +257,42 @@
   - ServiceAccount access is also managed by RBAC
   - Bind ServiceAccounts with ClusterRole or ClusterRoleBinding to provide access to Cluster APIs
   - in the manifest, set kind RoleBinding or ClusterRoleBinding, set a ServiceAccount kind under "subjects" field
+
+## Pods & Containers in K8s
+
+- Application Config
+  - properties or settings that are externalised eg. db configuration
+  - k8s allows user to pass dynamic config values to app during runtime
+  - allow user to control the app flow
+  - eg config for dev/uat/prod
+  - can pass the config via ConfigMap in k8s
+- ConfigMaps
+  - keep non-sensitive data in configMap (no secrets/credentials) to pass to container running application
+  - store in key-value format
+  - allow users to separate configurations from pods and components
+    - multiple configMaps for multi containers (separate config for pod to pod, 1:1 mapping for container to configMap)
+  - make configuration easier to change and manage
+  - prevent hardcoding of config data to pod
+  - configMap Commands
+    - via config file (can be multiple files to create a single configMap)
+      - kubectl create configmap nameOfConfigMap --from-file filePath1 --from-file filePath2
+      - kubectl create condifmap nameOfConfigMap --from-file directoryPath
+    - via cli (to get existing configmap alr running on sys)
+      - kubectl get configmap nameOfConfigMap -o yaml (yaml output file)
+      - kubectl get configmap nameOfConfigMap -o json (json output file)
+- Secrets
+  - designed to keep sensitive data
+  - can create secrets from file (after generate secrets can delete the files)
+    - kubectl create scret secretName --from-file=./fileName.txt --from-file=./fileName2.txt
+  - get from cli
+    - kubectl get secrets (default namespace)
+    - kubectl describe screts secretName
+  - secrets.yaml file for username & password need to be in encoded64 format
+  - take note for special characters used in secrets such as "$", "\", "\*", "\!" require escaping
+- Env Variables
+  - Pass ConfigMap and Secrets to Containers via Env Var
+    - using valueFrom: configMapKeyRef: to set the env variable to ref the configMap
+- Configuration Mount Volumes
+  - Pass Config Data and Secrets to Containers
+  - Config Data will be available in Files to Container system
+    - using volumes: -name: config-volume configMap:
