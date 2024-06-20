@@ -57,3 +57,55 @@
 - the configmap key:value pairs and secrets are located in the mount path
   - ls /etc/config/configMap/
   - ls /etc/config/secret
+
+# App Config using Posix Lab
+
+## create configMap POSIX
+
+- vim sample-posix-configMap.yml
+
+## apply the configmap
+
+- kubectl apply -f sample-posix-configMap.yml
+
+## create the pod definition
+
+- vim lab-cm-posix-demo-pod.yml
+
+## apply the pod definition
+
+- kubectl apply -f lab-cm-posix-demo-pod.yml
+
+# App Config using File
+
+## Update server
+
+- sudo apt-get update
+- apt install apache2-utils
+
+## Create a htpasswd file (user is the username)
+
+- htpasswd -c .htpasswd user
+- ls -a (to see the .htpasswd file)
+- cat .htpasswd (will see testuser:encryptedPassword)
+
+## Create secrets off the file
+
+- kubectl create secret generic nginx-htpasswd --from-file .htpasswd
+- kubectl get secrets
+- kubectl describe secret nginx-htpasswd
+- rm -rf .htpasswd
+
+## Create configMap off file
+
+- vim nginx.conf
+- kubectl create configmap nginx-config-file --from-file nginx.conf
+- kubectl describe configmap nginx-config-file
+
+## Create nginx pod
+
+- vim lab-nginx-pod.yml
+- kubectl apply -f lab-nginx-pod.yml
+- kubectl get pods
+- kubectl describe pod nginx-pod
+- kubectl logs nginx-pod

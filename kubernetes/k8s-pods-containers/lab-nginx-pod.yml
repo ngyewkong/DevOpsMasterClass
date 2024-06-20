@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+spec:
+  containers:
+  - name: nginx-container
+    image: 'nginx:1.19.1'
+    ports:
+    - containerPort: 80 # port number
+    resources:
+      limits:
+        cpu: "0.5"
+        memory: "512Mi"
+    volumeMounts:
+    - name: nginx-config-volume
+      mountPath: /etc/nginx # this is default location for nginx.conf file
+    - name: htpasswd-volume
+      mountPath: /etc/nginx/conf # refer to the nginx.conf
+  volumes:
+  - name: nginx-config-volume
+    configMap:
+      name: nginx-config-file # the name of the configMap to map to
+  - name: htpasswd-volume
+    secret:
+      secretName: nginx-htpasswd # the name of the secret to map to
