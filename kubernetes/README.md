@@ -296,3 +296,18 @@
   - Pass Config Data and Secrets to Containers
   - Config Data will be available in Files to Container system
     - using volumes: -name: config-volume configMap:
+- Container Resources
+  - Resource Request
+    - allows user to define a resource limit that container is expected to use
+    - kube scheduler will manage resource req and avoid scheduling on node which do not have enough resources
+    - Note: containers are allowed to use more or less than the request resource
+    - Note: Resource Request is to manage the scheduling of resources only
+    - Memory is measured in Bytes or MB
+    - CPU resources are measured in cpu units. 1 vCPU -> 1000 CPU unit, 500 CPU units is half core cpu
+    - set in the pod definition under containers: resources: requests: memory: "64Mi" cpu: "250m" -> 64MB mem, 0.25 core cpu
+  - Resource Limit
+    - the actual limit the container resource can use
+    - limits are imposed at RunTime container
+    - set in the pod definition under containers (instead of requests -> limits): resources: limits: memory: "128Mi" cpu: "500m" -> maximum use 128Mb and 0.5 cpu core
+    - once hit the memory limit, k8s will kill the container & restart the container
+    - once hit the cpu limit, k8s will throttle the process but container still running
