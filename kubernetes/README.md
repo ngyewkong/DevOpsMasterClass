@@ -311,3 +311,35 @@
     - set in the pod definition under containers (instead of requests -> limits): resources: limits: memory: "128Mi" cpu: "500m" -> maximum use 128Mb and 0.5 cpu core
     - once hit the memory limit, k8s will kill the container & restart the container
     - once hit the cpu limit, k8s will throttle the process but container still running
+- Container Health Check
+  - k8s provide features to monitor containers
+  - active monitoring helps k8s decide the container state and auto restart failed container
+    - minimise downtime
+  - Liveness Probe (active health check - check if container is running)
+    - helps to determine the container state
+    - by default, k8s only consider container to be down if container process is stopped
+    - helps user to improve & customised the container monitoring mechanism
+    - two types of liveness probes
+      - Run Command in Container (initialDelay is set to not check immediately give the container to startup)
+        - livenessProbe: exec: command: -the-command-to-run- initialDelaySeconds: 5 periodSeconds: 5
+      - Periodic HTTP Health Check (for web app, timeoutSeconds is how long the req can take before being marked as failure)
+        - livenessProbe: httpGet: path: somepath/health.html port:8080 httpHeaders: -name: Custom-Header value: awesome initialDelaySeconds: 3 periodSeconds: 3 timeoutSeconds: 1
+  - Startup Probe
+    - setting up liveness probe is tricky with app that has long startup time eg. data analytics app, heavy software > 10mins 50mins etc
+    - only runs at container startup and stop running once container success
+    - if both startup & liveness probes are in the manifest -> startup probe will execute first during container startup then starup probe will exit and liveness probe will take over
+    - parameters are same as liveness probe setup manifest
+      - failureThreshold: when startup probe fails, k8s will retry x number of times before giving up
+      - if both failure Threshold and periodSeconds are set, the app will have failureThreshold x periodSeconds to finish its startup
+  - Readiness Probe
+    - used to detect if container is ready to accept traffic
+      - eg app is backend and frontend (2 containers)
+      - frontend container usually launch and ready very quickly compared to backend
+      - backend container might not come up yet
+      - frontend container starts accept traffic -> error as backend is still down
+      - eg need to load large data or config files during startup
+      - eg depends on external services after startup
+    - define end-to-end health checks
+    - no traffic will be sent to the pod until container pass readiness probe
+    - readinessProbe (fields are same as liveness/startup probes): exec: command: - cat - /tmp/healthy initialDealySeconds: 5 periodSeconds: 5
+    - liveness and readiness probes can be set in the same manifest to ensure end to end and container running state
