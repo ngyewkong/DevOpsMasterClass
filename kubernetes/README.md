@@ -357,3 +357,11 @@
   - Never Policy
     - never allow container to restart even if liveness probe failed
     - use this policy on app that run only once and never automatically restarted
+- Multi-container Pods
+  - k8s pods can have single or multiple containers in a pod
+  - multi-container pods, containers can share the resources like network & storage
+  - containers in multi-container pods can also communicate on localhost
+  - note: best practice is to keep containers in separate pods unless we want the containers to share the resources
+  - containers can interact with shared resources in the same pod
+    - Network: containers share the same network and communicate on any port unless the port is exposed to cluster
+    - Storage: containers can use the same shared volumes & share data
