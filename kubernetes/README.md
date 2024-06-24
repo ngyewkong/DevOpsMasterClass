@@ -365,3 +365,15 @@
   - containers can interact with shared resources in the same pod
     - Network: containers share the same network and communicate on any port unless the port is exposed to cluster
     - Storage: containers can use the same shared volumes & share data
+- Container Initialization
+  - Init Containers
+    - specialized containers that run before app containers in a Pod
+    - only run once during the start up process of Pod
+    - can contain utilities or setup scripts not present in an app image
+    - Users can define N number of Init Containers in a Pod Manifest file
+    - Flow: Init Container 1 -> Init Container 2 (sequential) -> App Container (will only start once all Init Containers completed status)
+    - Use Case: Setup App Init or Setup Scripts
+      - make app image less bulky
+    - Init containers offer a mechanism to block or delay app container startup until a set of preconditions are met
+    - Init containers can securely run utilities or custom code that would otherwise make an app container image less secure
+    - Populate data at Shared Volume before app startup
