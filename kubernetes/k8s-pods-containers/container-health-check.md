@@ -45,3 +45,9 @@
   - pod will be running but not ready
 - kubectl describe pod hc-probe
   - Readiness probe failed: Get "http://the_pod_ip:9090/"
+
+## Self-healing Pods Lab
+
+- vim lab-restart-policies.yml
+- kubectl apply -f lab-restart-policies.yml
+- kubectl get pods -o wide

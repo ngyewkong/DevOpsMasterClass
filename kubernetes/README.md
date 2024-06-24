@@ -343,3 +343,17 @@
     - no traffic will be sent to the pod until container pass readiness probe
     - readinessProbe (fields are same as liveness/startup probes): exec: command: - cat - /tmp/healthy initialDealySeconds: 5 periodSeconds: 5
     - liveness and readiness probes can be set in the same manifest to ensure end to end and container running state
+- Pods Restart Policies
+  - By default, it is set to Always in k8s
+  - Always Policy
+    - containers will always restart even if container completed successfully
+    - eg. one time executable job that you only want to run once and exit
+    - Always policy is recommended for containers that should always be in running state
+    - intermittent containers shld not have this Always Policy
+  - OnFailure Policy
+    - if container process exit with error code -> pod restarts
+    - works with liveness probe to determine if container is healthy
+    - use this policy on app that needs to be run successfully & then stop (will not restart in stopped state)
+  - Never Policy
+    - never allow container to restart even if liveness probe failed
+    - use this policy on app that run only once and never automatically restarted
