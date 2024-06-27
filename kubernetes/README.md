@@ -377,3 +377,21 @@
     - Init containers offer a mechanism to block or delay app container startup until a set of preconditions are met
     - Init containers can securely run utilities or custom code that would otherwise make an app container image less secure
     - Populate data at Shared Volume before app startup
+
+## Pods Allocation in K8s
+
+- force delete pods in K8s
+  - kubectl delete all --all --force -n namespace
+- Pods Scheduling
+  - scheduling is a process to assign pods to nodes so that kubectl can run them
+  - Scheduler: component on k8s master node/control plane which decides the pods assignment on nodes
+    - factors affecting pod assignment
+      - resource request vs available node resources
+      - configuration like node labels
+      - nodeSelector, Affinity & Anti-Affinity
+        - nodeSelector
+          - defined in pod spec to limit which node the pod can be scheduled on (label)
+          - use labels to select the suitable node (nodeSelector: disktype: ssd -> the pod will only be scheduled on a node that has disktype: ssd as its label)
+        - nodeName
+          - bypass scheduling & assign pod to a specific node using node name
+          - not a good option for pod scheduling due to its limitations (dynamic infra -> no pod will be scheduled if the nodeName does not match)

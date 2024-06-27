@@ -27,6 +27,8 @@
 
 ## Upgrade Worker Node
 
+- if getting couldn't get current server API group list: Get "http://localhost:8080/api?timeout=32s": dial tcp [::1]:8080: connect: connection refused
+  - execute "export KUBECONFIG=/etc/kubernetes/kubelet.conf"
 - ensure upgrade of worker nodes is done via rolling update manner (to have no downtime)
 - one node at a time
 - drain worker node
