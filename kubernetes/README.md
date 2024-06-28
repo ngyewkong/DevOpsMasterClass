@@ -395,3 +395,11 @@
         - nodeName
           - bypass scheduling & assign pod to a specific node using node name
           - not a good option for pod scheduling due to its limitations (dynamic infra -> no pod will be scheduled if the nodeName does not match)
+- DaemonSets
+  - k8s Object that run a copy of a node on each node
+  - runs a copy of a pod on a new node as they are added to the cluster
+  - helpful use case for monitoring, log collection, proxy configuration etc
+  - default attached restart policy for a DaemonSet obj is "Always" restart policy
+- DaemonSets Scheduling (similar to Pods scheduling)
+  - follows normal scheduling rules around node labels, taints & tolerations
+  - if pods normally not scheduled on a node, daemonset will also not create copy of pod on that node
