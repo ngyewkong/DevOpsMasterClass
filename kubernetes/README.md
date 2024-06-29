@@ -412,7 +412,8 @@
     - will be similar to pod spec manifest yaml file
   - Use Case: monitoring or configuration without any K8s API server
 - Mirror Pods
-  - replicas of the static pod
+  - A Mirror Pod represents a Static Pod in the Kuberntes API, allowing you to easily view the Static Pod's status.
+    - replicas of the static pod
   - kubelet will create the mirror pod for each static pod
   - mirror pods allow user to monitor static pods via K8s API Server or Control Plane
   - can view status of static pods via mirror pods
