@@ -418,3 +418,26 @@
   - can view status of static pods via mirror pods
   - but cannot change or update static pods via mirror pods
     - for change, will need to update the manifest yaml file on the node and kubelet will update the status
+- Node Affinity in K8s
+  - enhanced version of NodeSelector
+  - used for Pods Allocation on Worker Nodes
+  - operator: In
+  - Not to schedule pod on specific node can be done via Node Anti-Affinity
+    - opposite of Node Affinity & NodeSelector concept
+  - requiredDuringSchedulingIgnoredDuringExecution:
+    - condition must be fulfilled at time of Pod Creation
+    - known as Hard Affinity
+    - pod will still run if labels on a node change and affinity rules are no longer met
+  - preferredDuringSchedulingIgnoredDuringExecution:
+    - prefer node to fulfill the condition but not mandatory
+    - known as Soft Affinity
+  - requiredDuringSchedulingRequiredDuringExecution:
+    - must be matched during scheduling & during execution of the pods
+- Node Anti-Affinity in K8s
+  - similar syntax definition in yaml files as Node Affinity
+  - key difference:
+    - operator: NotIn
+    - force pod to not be scheduled on node that meets the criteria
+- Preferred way is to use Node Affinity or Node Anti-Affinity over Node Selector over Node Name
+  - more flexibility
+  - nodeAffinity > nodeSelector > nodeName
