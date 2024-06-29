@@ -403,3 +403,18 @@
 - DaemonSets Scheduling (similar to Pods scheduling)
   - follows normal scheduling rules around node labels, taints & tolerations
   - if pods normally not scheduled on a node, daemonset will also not create copy of pod on that node
+- Static Pods
+  - directly managed by kubelet on k8s nodes
+  - not managed by the control plane
+  - K8s API Server not required for Static Pods
+  - kubelet watches each Static Pod (restarts it if it fails)
+  - kubelet autonatically creates Static Pods from the manifest yaml file located at the specific manifest path on each node
+    - will be similar to pod spec manifest yaml file
+  - Use Case: monitoring or configuration without any K8s API server
+- Mirror Pods
+  - replicas of the static pod
+  - kubelet will create the mirror pod for each static pod
+  - mirror pods allow user to monitor static pods via K8s API Server or Control Plane
+  - can view status of static pods via mirror pods
+  - but cannot change or update static pods via mirror pods
+    - for change, will need to update the manifest yaml file on the node and kubelet will update the status
