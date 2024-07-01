@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: ReplicaSet # ReplicaSet Object
+metadata:
+  name: myapp-replicas
+  labels:
+    app: myapp
+    tier: frontend
+spec:
+  replicas: 3
+  selector:
+    matchExpressions: # to match certain conditions
+    - {key: tier, operator: In, values: [frontend]} # this will match tier: frontend label to scale to 3 pods
+  template:
+    metadata:
+      labels:
+        app: myapp
+        tier: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80

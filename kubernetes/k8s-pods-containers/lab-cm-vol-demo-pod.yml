@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lab-cm-vol-demo
+spec:
+  containers:
+  - name: cm-vol-demo
+    image: alpine
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - name: player-map
+      mountPath: /etc/config/configMap # path in container that we plan to mount the volumes
+    - name: player-secret
+      mountPath: /etc/config/secret
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+  volumes:
+  # can set volumes at pod lvl -> mount them into containers inside the pod
+  - name: player-map
+    configMap:
+      # specify the configMap that you want to mount (refer to the name specified in sample-configMap.yml)
+      name: lab-demo-cm
+  - name: player-secret
+    secret:
+      # the name specified in the sample-secret.yml
+      secretName: lab-demo-secret
+

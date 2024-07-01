@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding # set the RoleBinding type 
+metadata:
+  name: pod-reader
+  namespace: development
+subjects: # add the User "DevUser" to bind it with the Role
+- kind: User
+  name: DevUser
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader # what is set when the Role is created 
+  apiGroup: rbac.authorization.k8s.io

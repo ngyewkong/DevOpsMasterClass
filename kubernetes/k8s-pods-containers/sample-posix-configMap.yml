@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lab-demo-cm-posix
+data:
+  # posix configMap only take CAPITAL CASE for keys
+  # will automatically create 1 env var for that key:value pair in the container
+  PLAYER_LIVES: "5"
+  PROPERTIES_FILE_NAME: "user-interface.properties"
+  BASE_PROPERTIES: "Template1"
+  USER_INTERFACE_PROPERTIES: "Dark"

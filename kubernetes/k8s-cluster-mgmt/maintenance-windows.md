@@ -1,0 +1,34 @@
+# Maintenance Window Demo Runbook
+
+- on master node, execute:
+  - setup cluster to have demo pods & deployments:
+    - kubectl get nodes
+    - kubectl get pods -o wide
+    - mkdir node_training
+    - cd node_training
+    - vim pod.yaml (refer to pod.yaml in k8s-cluster-mgmt dir)
+    - kubectl apply -f pod.yaml
+    - vim deployment.yaml (refer to deployment.yaml in k8s-cluster-mgmt dir)
+  - drain 1 of the worker node
+    - kubectl drain k8s-worker-02
+      - error: unable to drain node "k8s-worker-02" due to error: cannot delete DaemonSet-managed Pods (use --ignore-daemonsets to ignore) (from the calico system addon)
+      - error: cannot delete cannot delete Pods that declare no controller (use --force to override) (from the pod created by pod.yaml) for pods that are explicitly executing on the draining node
+    - kubectl drain k8s-worker-02 --ignore-daemonsets --force
+    - kubectl get nodes
+      - NAME STATUS ROLES AGE VERSION
+      - k8s-master-01 Ready control-plane 10h v1.30.1
+      - k8s-worker-02 Ready,SchedulingDisabled <none> 9h v1.30.1
+      - k8s-worker-03 Ready <none> 9h v1.30.1
+    - kubectl get pods -o wide
+      - pods that are executed on this drained node will not be rescheduled on another available node
+      - deployment that are excuted on multiple nodes will be rescheduled on availble node (i.e k8s-worker-03)
+  - add drained node back into cluster (after patch/upgrade)
+    - kubectl uncordon k8s-worker-02
+    - kubectl get nodes
+      - NAME STATUS ROLES AGE VERSION
+      - k8s-master-01 Ready control-plane 10h v1.30.1
+      - k8s-worker-02 Ready <none> 9h v1.30.1
+      - k8s-worker-03 Ready <none> 9h v1.30.1
+    - kubectl get pods -o wide
+      - does not guarantee that existing rescheduled pods will execute again on the uncordoned node
+      - workaround is to drain the other worker node and uncordon the other worker node

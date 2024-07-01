@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: startup-probe-http
+spec:
+  containers:
+  - name: startup-nginx
+    image: nginx
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "250m"
+    startupProbe: # to define the startup probe
+      httpGet:
+        path: /
+        port: 80
+      failureThreshold: 30
+      periodSeconds: 10

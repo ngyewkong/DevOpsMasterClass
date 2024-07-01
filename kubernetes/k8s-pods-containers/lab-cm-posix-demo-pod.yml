@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lab-cm-posix-demo
+spec:
+  containers:
+  - name: cm-posix-demo
+    image: alpine
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+    - containerPort: 8080
+    envFrom:
+    - configMapRef:
+        name: lab-demo-cm-posix
