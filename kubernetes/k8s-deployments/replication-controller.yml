@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ReplicationController # type 
+metadata:
+  name: alpine-box-replicationcontroller
+spec:
+  replicas: 3 # how many pods
+  selector:
+    app: alpine-box # the selector must match the pod label in template
+  template:
+    metadata:
+      name: alpine
+      labels:
+        app: alipne-box
+    spec:
+      containers:
+      - name: alpine-box
+        image: alpine
+        command: ["sleep", "3600"]

@@ -442,3 +442,23 @@
 - Preferred way is to use Node Affinity or Node Anti-Affinity over Node Selector over Node Name
   - more flexibility
   - nodeAffinity > nodeSelector > nodeName
+
+## K8s Deployments
+
+- Scaling Application in K8s -> allow handling of more requests per minute (rpm)
+- pods can be scaled vertically (increase resources to existing nodes) or horizontally (increase number of nodes)
+- Stateless App
+  - stateless app do not save client data generated in one sessiion for use in the next session with that client
+  - stateless app can be scaled horizontally (no intermediate data)
+  - new pods can be created for stateless apps
+  - eg frontend app
+- Stateful App
+  - stateful app saves client data from activities for use in next session
+  - data saved is called the app state
+  - stateful app can be scaled vertically
+  - eg database service
+  - db services cannot be split in multiple instances
+- ReplicationController
+  - used to manage app instances scaling
+  - ensures that a specified number of pod replicas are running at any point of time
+  - ensures pod or set of pods are always up & available according to spec specified
