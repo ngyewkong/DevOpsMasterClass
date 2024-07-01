@@ -462,3 +462,16 @@
   - used to manage app instances scaling
   - ensures that a specified number of pod replicas are running at any point of time
   - ensures pod or set of pods are always up & available according to spec specified
+- ReplicaSet
+  - enhanced version of ReplicationController
+  - like ReplicationController maintains the set of replica pods running at any given time
+  - main difference is the selector support
+    - ReplicaSet allows for matchExpressions which we can provide conditional statement
+      - In, NotIn, Exists operators etc
+  - Label Selector used to identify a set of Objects in k8s
+  - can use "set-based" label selector
+- Bare Pods
+  - Bare Pods do not have labels which match the selector of one of your ReplicaSets
+  - must make sense the labels do not match with the condition set in the ReplicaSet template
+    - ReplicaSet is not limited to its own created Pods specified by its template
+    - it will acquire other Pods which have matching labels

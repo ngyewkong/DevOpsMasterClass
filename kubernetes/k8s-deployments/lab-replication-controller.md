@@ -8,7 +8,7 @@
   - see 3 pods alipne-box-replicationcontroller running
 - kubectl delete pod alpine-box-replicationcontroller-5tcqm (any one of the pod)
   - will see the pod terminating and another pod being spin up to maintain the 3 pods specified
-- kubectl get replicationcontroller or kubectl get replicationcontroller/alpine-box-replicationcontroller (get status of the replication controller)
+- kubectl get replicationcontroller or kubectl get replicationcontroller/alpine-box-replicationcontroller or kubectl get rc (get status of the replication controller)
 - scaling up
   - kubectl scale --replicas=6 replicationcontroller/alpine-box-replicationcontroller (scale replication controller to have 6 pods in total)
 - kubectl get pods -o wide

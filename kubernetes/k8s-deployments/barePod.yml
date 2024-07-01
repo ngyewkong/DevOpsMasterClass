@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod1
+  labels:
+    tier: frontend # both bare pods share the same label as the replicaset
+spec:
+  containers:
+  - name: application1
+    image: alpine-box
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod2
+  labels:
+    tier: frontend
+spec:
+  containers:
+  - name: application2
+    image: alpine-box
