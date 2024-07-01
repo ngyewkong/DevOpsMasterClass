@@ -475,3 +475,17 @@
   - must make sense the labels do not match with the condition set in the ReplicaSet template
     - ReplicaSet is not limited to its own created Pods specified by its template
     - it will acquire other Pods which have matching labels
+- Deployment Object
+  - One step higher than ReplicaSet
+  - top level abstract hierarchy
+  - desired state of ReplicaSet
+  - Deployment control both ReplicaSets & Pods in a declarative manner
+  - Smallest Unit of Deployment is a Pod which runs containers
+    - Each pod has its own IP address & shares a PID namespace, network & hostname
+  - Deployment -> ReplicaSet -> Pod -> Container
+  - Use Case for Deployment
+    - Create Deployment: Deploy Application Pods
+    - Update Deployment: Push new version of App in controlled manner
+    - Rolling Upgrade: Upgrade App with zero downtime (one pod at a time)
+    - Rollback: rollback the upgrade in case of unstable upgrade, revise the deployment state (rolling restart/rollback)
+    - Pause/Resume Deployment: Rollout a certain percentage
