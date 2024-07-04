@@ -489,3 +489,20 @@
     - Rolling Upgrade: Upgrade App with zero downtime (one pod at a time)
     - Rollback: rollback the upgrade in case of unstable upgrade, revise the deployment state (rolling restart/rollback)
     - Pause/Resume Deployment: Rollout a certain percentage
+
+## K8s Services
+
+- Services are used to access App running on Pods
+- Pods are dynamic -> created and terminated on demand
+  - using replicationController
+  - using Deployments
+- Pods cannot be accessed directly -> should be done through Service
+- using kubectl expose create a service for pods so that they can be assessed externally
+- creating a service in k8s -> create endpt for pods
+- the set of pods targeted by a service is usually determined by a selector in the manifest yaml file
+  - using Service Object as the kind type in manifest spec declaration
+  - spec: selector: to target pods
+  - ClusterIP: exposes the service on a cluster-internal IP (service only reachable within the cluster)
+  - NodePort: exposes the service on each Node's IP at a static port (able to reach the NodePort Service from outside the cluster by hitting NodeID:NodePort)
+  - Load Balancer: exposes the service externally using a cloud provider load balancer (NodePort & ClusterIP services, to which the external load balancer routes, are automatically created)
+  - External Name: Maps the Service to the contents of the external name field by returning a CNAME record

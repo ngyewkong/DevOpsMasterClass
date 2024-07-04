@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service # service object
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx-pod # find pod that match this label
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: nginx-port # follow the pod manifest naming
