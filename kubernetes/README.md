@@ -535,3 +535,25 @@
     - coredns-7db6d8ff4d-2wh9c
   - kubectl get services -o wide -n kube-system
     - kube-dns
+- Using Network Policies
+  - to control traffic flow on pods at IP address level or Port level
+  - Network Policy is an Object in K8s
+  - Pods communicate using three identifiers
+    - other pods that are allowed
+    - namespaces that are allowed
+    - IP blocks (range)
+  - build a secure network by keeping pods isolated from traffic that they do not need
+  - default: pods are non-isolated -> accept traffic from any source
+  - pods become isolated by having a NetworkPolicy that selects them
+  - podSelector: matchLabels: determines which pods in ns that the NetworkPolicy will be applied
+    - select pods using labels
+    - empty podSelector selects ALL pods in the ns
+  - NetworkPolicy applies to both ingress & egress traffic
+  - fromSelector: select Ingress traffic that will be allowed on pods
+    - ingress: - from: - podSelector: matchLabels: role: client (select pods to allow traffic from)
+    - ingress: - from: - namespaceSelector: matchLabels: role: client (select namespace to allow traffic from)
+    - ingress: - from: - ipBlock: cidr: 172.17.0.0/16 (select IP range 172.17.0.0 to 172.17.255.255 to allow traffic from)
+  - toSelector: select Egress traffic that will be allowed from pods
+  - Ports: specify one or more ports that allow traffic
+    - ingress: - from: ports: - protocol: TCP port: 80
+    - egress: - to: ports: - protocol: TCP port: 32000 endPort: 32768 (allow a range of ports from 32000 to 32768 to have traffic out of the pod)

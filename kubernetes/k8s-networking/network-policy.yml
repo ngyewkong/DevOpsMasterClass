@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy # the NetworkPolicy Object
+metadata:
+  name: sample-network-policy
+  namespace: network-policy # the namespace
+spec:
+  podSelector: # select pod
+    matchLabels:
+      app: frontend # this matches with the nginx-pod labels
+  policyTypes: # policies type
+  - Ingress
+  - Egress
+  ingress: # if ingress or egress not added here (all pods that match the label will be isolated - cannot curl)
+  - from:
+    - namespaceSelector: # only allow ingress traffic into pods from within the ns that match the label
+        matchLabels:
+          role: test-network-policy
+    ports: # allow ingress traffic on port 80
+    - protocol: TCP
+      port: 80
