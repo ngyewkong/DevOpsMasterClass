@@ -506,3 +506,32 @@
   - NodePort: exposes the service on each Node's IP at a static port (able to reach the NodePort Service from outside the cluster by hitting NodeID:NodePort)
   - Load Balancer: exposes the service externally using a cloud provider load balancer (NodePort & ClusterIP services, to which the external load balancer routes, are automatically created)
   - External Name: Maps the Service to the contents of the external name field by returning a CNAME record
+- Labels: Key-Value pairs that are attached to objects
+  - nodeSelector to select the node that match the label specified
+
+## K8s Networking
+
+- Multiple Network Model available (eg Calico)
+- Fundamental requirements on any network impl
+  - pods on a node can communicate with all pods on all nodes without NAT
+  - agents on a node (eg system daemons, kubelet) can communicate with all pods on that node
+  - each pod gets its own IP add
+- CNI Plugins: K8s Network Plugins
+  - provide connectivity between pods as per k8s network model
+  - refer to k8s doc for the specific plugin available
+  - selection of network plugin based on business needs
+  - HA SetUp: using Calico as support for kubeadm is btr
+    - install Calico using Calico yml file
+    - note: k8s nodes will remain NotReady state until Network plugin is installed - users wont be able to run pods
+- K8s DNS
+  - allow Pods to locate pods & services using Domain Name
+  - DNS run as a Service in kube-system ns
+  - kubeadm/minikube use CoreDNS
+  - all pods in kubeadm cluster are automatically given a domain name
+    - ie pod-ip.namespace-name.pod.cluster.local
+    - pod DNS in default ns with ip 190.168.0.20
+      - eg 190-168-0-20.default.pod.cluster.local
+  - kubectl get pods -o wide -n kube-system
+    - coredns-7db6d8ff4d-2wh9c
+  - kubectl get services -o wide -n kube-system
+    - kube-dns
