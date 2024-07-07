@@ -511,6 +511,13 @@
   - External Name: Maps the Service to the contents of the external name field by returning a CNAME record
 - Labels: Key-Value pairs that are attached to objects
   - nodeSelector to select the node that match the label specified
+- Service Discovery
+  - K8s DNS assign DNSNames to Services, allow app within cluster to locate the service
+  - Service Fully Qualified Domain Name (FQDN) format
+    - service-name.namespace-name.svc.cluster-domain.example
+    - default: service-name.namespace-name.svc.cluster.local
+  - Service FQDN can be used to reach services from within any namespace in cluster
+  - Pods within same namespace can use Service Name only
 
 ## K8s Networking
 
