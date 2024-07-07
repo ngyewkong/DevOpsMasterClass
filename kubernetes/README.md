@@ -518,6 +518,21 @@
     - default: service-name.namespace-name.svc.cluster.local
   - Service FQDN can be used to reach services from within any namespace in cluster
   - Pods within same namespace can use Service Name only
+- Ingress Controller (Abstract Interface)
+  - Manage the external access to Service
+  - External Client -> Ingress -> Service
+  - Apart from NodePort Service, it provides:
+    - SSL Termination
+    - Load Balancing
+    - NameBase Virtual Hosting
+- For Ingress resource to work -> cluster must have an ingress controller running
+- can deploy N number of Ingress Controllers
+- Ingress define a set of Routing Rules
+  - each rule has a set of paths that match with a Backend Service -> req that match a path will be routed to the Backend Service
+- NamedPort: Ingress can also use the pod's name to choose which port it will route
+  - good if port will change in the future will not need to update ingress manifest
+  - in Service Manifest: ports: - name: nginx-port
+  - in Ingress Manifest: rules: - http: paths: - path: backend: service: port: name: nginx-port
 
 ## K8s Networking
 
