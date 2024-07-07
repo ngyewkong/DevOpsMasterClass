@@ -1,0 +1,31 @@
+# K8s Services Lab
+
+- vim svc-pod.yml
+- kubectl apply -f svc-pod.yml
+- kubectl describe deployment.apps/nginx-server
+- kubectl get pods -o wide
+- vim clusterip-svc.yml
+- kubectl apply -f clusterip-svc.yml
+- kubectl describe service/nginx-service
+  - Selector: app=frontend
+  - Type: ClusterIP
+  - Port: <unset> 80/TCP
+  - TargetPort: 8080/TCP
+  - Endpoints: 192.168.7.140:8080,192.168.7.189:8080 (IP Add of the pods)
+- curl nginx-service:8080
+  - could not resolve host -> nginx-service is using ClusterIP (only pods within same cluster can communicate)
+- vim svc-pod-test.yml
+- kubectl apply -f svc-pod-test.yml
+- kubectl exec pod-svc-test -- curl nginx-service:8080
+  - shld be able to successfully hit & see the default nginx page
+- vim nodeport-svc.yml
+- kubectl apply -f nodeport-svc.yml
+- kubectl describe service/nginx-service-nodeport
+  - Selector: app=frontend
+  - Type: NodePort
+  - Port: <unset> 80/TCP
+  - TargetPort: 80/TCP
+  - NodePort: <unset> 30099/TCP
+  - Endpoints: 192.168.7.140:80,192.168.7.189:80
+- curl localhost:30099 / curl 143.198.86.171:30099
+  - shld see the default nginx page

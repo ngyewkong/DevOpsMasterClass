@@ -503,7 +503,10 @@
   - using Service Object as the kind type in manifest spec declaration
   - spec: selector: to target pods
   - ClusterIP: exposes the service on a cluster-internal IP (service only reachable within the cluster)
+    - use case: when client is other pod within the same cluster
+    - when pods in different namespace in same cluster need to communicate with one another
   - NodePort: exposes the service on each Node's IP at a static port (able to reach the NodePort Service from outside the cluster by hitting NodeID:NodePort)
+    - use case: when client is accessing the service from outside the cluster
   - Load Balancer: exposes the service externally using a cloud provider load balancer (NodePort & ClusterIP services, to which the external load balancer routes, are automatically created)
   - External Name: Maps the Service to the contents of the external name field by returning a CNAME record
 - Labels: Key-Value pairs that are attached to objects
