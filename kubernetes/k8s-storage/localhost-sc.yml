@@ -1,0 +1,7 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass # the object
+metadata:
+  name: local-storage # name of storage class
+provisioner: kubernetes.io/no-provisioner # will be created on the local machine where it is being executed
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true # allow for resize of the volume if required

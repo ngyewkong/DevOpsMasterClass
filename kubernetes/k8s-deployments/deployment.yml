@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment # Object Type 
+metadata:
+  name: chef-server
+  labels:
+    app: chef # label
+spec:
+  replicas: 3 # number of replicas
+  selector:
+    matchLabels:
+      app: chef-server # match label on the pods
+  template:
+    metadata:
+      labels:
+        app: chef-server # must match with the spec selector
+    spec:
+      containers: # 1 Pod 2 Containers setup
+      - name: chef-server # first container
+        image: 'rhels/chefdk'
+        ports:
+        - containerPort: 8080
+        command:
+        - /bin/sh
+        args:
+        - '-c'
+        - echo Hello from the Chef container; sleep 3600
+      - name: ubuntu # second container
+        image: 'ubuntu:18.04'
+        ports:
+        - containerPort: 8080
+        command:
+        - /bin/sh
+        args:
+        - '-c'
+        - echo Hello from the Ubantu container; sleep 3600

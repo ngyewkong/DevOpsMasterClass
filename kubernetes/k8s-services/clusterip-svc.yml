@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service # service type
+metadata:
+  name: nginx-service
+spec:
+  type: ClusterIP # cluster ip for pods within same cluster communication (by default will take ClusterIP if not specified)
+  selector:
+    app: frontend # find all pods that match
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080 # which port for this to be accessible

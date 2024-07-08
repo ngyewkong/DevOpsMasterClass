@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis-emptydir # name of pod
+spec:
+  containers:
+  - name: redis # container name
+    image: redis
+    volumeMounts:
+    - name: redis-storage
+      mountPath: /data/redis # the path that the container will read/write 
+  volumes:
+  - name: redis-storage
+    emptyDir: {} # dynamic volume (did not specify the file dir of the host node)

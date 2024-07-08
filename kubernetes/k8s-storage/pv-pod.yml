@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod # object
+metadata:
+  name: my-pv-pod
+spec:
+  restartPolicy: Never
+  containers:
+  - name: busybox # creating a pod with container using busybox
+    image: busybox
+    command: ["sh", "-c", "echo Hello Team, This is Persistnent Volume Claim >> /output/success.txt"]
+    volumeMounts:
+    - mountPath: /output
+      name: my-pv
+  volumes: # define the vol used by the container
+  - name: my-pv
+    persistentVolumeClaim:
+      claimName: my-pvc # this is created in pvc.yml

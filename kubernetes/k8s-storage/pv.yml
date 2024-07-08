@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume # Object type
+metadata:
+  name: my-persistent-vol
+spec:
+  storageClassName: local-storage # reference to the storage class created
+  persistentVolumeReclaimPolicy: Recycle
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  hostPath:
+    path: /var/tmp
