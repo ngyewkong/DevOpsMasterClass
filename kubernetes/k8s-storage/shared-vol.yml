@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shared-multi-container
+spec:
+  volumes:
+  - name: html
+    emptyDir: {} # dynamic volume that is shared with all containers within the Pod
+  containers:
+  - name: nginx-container
+    image: nginx
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html # mounting this location in nginx-container to emptyDir
+  - name: debian-container
+    image: debian
+    volumeMounts:
+    - name: html
+      mountPath: /html
+    command:
+    - /bin/sh
+    - '-c'
+    args:
+    - while true; do date >> /html/index.html; sleep 5; done
+    # append the date to the index.html file present at /html dir 
+    # which is mapped to emptyDir which has the nginx index.html
