@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim # Object Type
+metadata:
+  name: my-pvc
+spec:
+  storageClassName: local-storage # reference to the storage class created
+  accessModes:
+  - ReadWriteOnce # match with properties of the created PV -> no new PV created
+  resources:
+    requests:
+      storage: 100Mi

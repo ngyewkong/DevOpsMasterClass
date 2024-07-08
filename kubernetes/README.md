@@ -622,3 +622,37 @@
     - powerful feature which can be used to transform Data or process Data
       - eg container 1 generate the Data on the shared volume -> container 2 transform the data to another form
     - both hostPath & emptyDir support shared volumes
+- PersistentVolume (PV)
+  - K8s Object that allow user to treat Storage as an Abstract Resource
+  - PV is a resource in the cluster just like the node is also a cluster resource
+  - PV uses a set of Attributes to describe the underlying storage resources (Disk or Cloud Storage) which will be used to store data
+  - kind: PersistentVolume spec: capacity: storage: 1Gi accessmodes: - ReadWriteMany hostPath: path: /var/tmp storageClassName: local-storage
+- StorageClass
+  - allow K8s Admin to specify all types of Storage Service they offer on their Platform
+  - another K8s object under storage.k8s.io/v1
+  - kind: StorageClass
+  - provisioner: kubernetes/io/no-provisioner -> storage class will be provsioned on the k8s cluster node where this obj is created
+  - volumeBindingMode: WaitForFirstConsumer -> once a pod that is created that reference this StorageClass, only then the storage block will be reserved
+  - eg of admin creating a StorageClass called Slow to describe inexpensive storage for dev use
+    - apiVersion: stoage.k8s.io/v1
+    - kind: StorageClass
+    - metadata:
+      - name: slow
+    - provisioner: kubernetes.io/aws-ebs (will need to install the plugin in the K8s cluster & authenticate before able to use aws ebs)
+    - parameters:
+      - type: io1
+      - iopsPerGB: "10"
+      - fsType: ext4
+  - allowVolumeExpansion: accept boolean values only
+    - property of StorageClass & define whether StorageClass supports the ability to resize after creation
+    - ALL cloud disk support this property
+  - ReclaimPolicy: persistentVolumeReclaimPolicy - define how the storage will be reused. when the PV associated PVCs are deleted
+    - Retain: keep all data -> require manual data cleanup & prepare for reuse
+    - Delete: delete underlying storage resources automatically (support for cloud resources only)
+    - Recycle: automatically delete all data in underlying storage & allow PVs to be reused
+- PersistentVolumeClaim (PVC) - a request for storage by user
+  - define a set of attributes similar to PVs
+  - PVCs will look for PVs that is able to meet the criteria -> if found, will automatically be bound to that PV
+  - will create dynamic PV if no matching PV is found and PVC will attach to that PV
+  - PVC is also an K8s Object
+  - Pod -> PVC -> PV -> StorageClass -> Cloud Storage
