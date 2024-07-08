@@ -582,3 +582,43 @@
   - Ports: specify one or more ports that allow traffic
     - ingress: - from: ports: - protocol: TCP port: 80
     - egress: - to: ports: - protocol: TCP port: 32000 endPort: 32768 (allow a range of ports from 32000 to 32768 to have traffic out of the pod)
+
+## K8s Storage
+
+- Container File System is ephemeral (temporary)
+- Files in container file sys exists only as long as the container exists
+- Data in container file sys is lost as soon as container is deleted or recreated
+- stateless app this is okay
+- however for stateful apps -> will need another solution
+- Volumes
+  - volumes allow to store data outside the container while allowing container to access data at runtime
+  - volumes offer a way to provide external storage to container within the pod/container specification
+- Persistent Volumes (more advanced than volumes)
+  - allow user to treat Storage as an abstract resource and consume it using pods
+  - Pod -> Container -> Persistent Volume Claim (PVC) -> Persistent Volume (PV) -> External Storage
+- Volume Types
+  - Volume & PV each have a volume type
+  - volume type determines how storage will be handled
+  - NFS (Network File System)
+  - Cloud Storage (AWS, GCP, Azure)
+  - ConfigMaps & Secrets
+  - Filesystem on the K8s Node
+  - Using K8s Volumes (Volumes & Volume Mount)
+    - Volume: In Pod Spec, user can define the storage volume available for the Pod
+    - VolumeMount: Container Spec, refer to the Volume in Pod Spec & provides a MountPath
+    - kind: Pod spec: volumes: - name: sample-vol hostPath: path: /data containers: - name: pv-recycler image: nginx volumeMounts: - name: sample-vol mountPath: /output
+    - will see the pod definition will define the volumes, with hostPath as the volume type
+    - sample-vol object will be created and mapped to /data on the node
+    - volumeMounts is matching the volumes
+    - create the /output dir on the /data directory on the node
+      - when container restart or recreate the data stored at /output on your host machine will still be available
+  - emptyDir Volume: dynamic volume created when Pod is assigned to Node & persist as long as Pod running on node
+    - when pod is deleted the emptyDir volume will also be deleted
+    - use case: multiple containers can refer to the same emptyDir volume unlike container filesystem (shareable within Pod)
+    - multiple containers in the pod can read and write the same files in the emptyDir volumes
+    - volumes: - name: cache-vol emptyDir: {}
+  - Sharing Volume
+    - User can use the same volumeMounts to share the same Volume to multiple containers within the same pod
+    - powerful feature which can be used to transform Data or process Data
+      - eg container 1 generate the Data on the shared volume -> container 2 transform the data to another form
+    - both hostPath & emptyDir support shared volumes
