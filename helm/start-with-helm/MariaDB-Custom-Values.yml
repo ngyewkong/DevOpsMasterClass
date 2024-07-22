@@ -1,0 +1,24 @@
+# Copyright Broadcom, Inc. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+## MariaDB Authentication parameters
+##
+auth:
+  ## @param auth.rootPassword Password for the `root` user. Ignored if existing secret is provided.
+  ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mariadb#setting-the-root-password-on-first-run
+  ##
+  rootPassword: "someRootPassword" ## use some env params to pass in the values.yml file for custom values
+  ## @param auth.database Name for a custom database to create
+  ## ref: https://github.com/bitnami/containers/blob/main/bitnami/mariadb/README.md#creating-a-database-on-first-run
+  ##
+  database: "helm-testdb"
+  ## @param auth.username Name for a custom user to create
+  ## ref: https://github.com/bitnami/containers/blob/main/bitnami/mariadb/README.md#creating-a-database-user-on-first-run
+  ##
+  username: "helm-dbadmin" ## demo upgrade chart change from helm-testusr to helm-dbadmin
+  ## @param auth.password Password for the new user. Ignored if existing secret is provided
+  ##
+  password: "test-password-updated" ## use some env params to pass in the values.yml file for custom values
+  ## @param auth.replicationUser MariaDB replication user
+  ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mariadb#setting-up-a-replication-cluster
+  ##

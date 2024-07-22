@@ -64,7 +64,7 @@
 
 - helm list (to see list of deployments done by helm)
 
-### Reusing Deployment Name
+## Reusing Deployment Name
 
 - helm install my-redis bitnami/redis --version 19.5.5 (older version)
   - Error: INSTALLATION FAILED: cannot re-use a name that is still in use
@@ -76,3 +76,81 @@
 - helm list --all-namespaces or helm list -A
   - will see both deployments with diff namespace info
 - helm status my-redis or helm status my-redis -n redis (get back the info list from above)
+
+## Provide Custom Values to HELM Chart
+
+### clean up the space
+
+- helm delete my-redis
+- helm delete my-redis -n redis
+- kubectl delete pod redis-client (this was created explicitly via kubectl previously)
+
+### install mariadb
+
+- https://artifacthub.io/packages/helm/bitnami/mariadb
+- helm repo update (to update the bitnami repo)
+- helm install my-mariadb bitnami/mariadb --version 19.0.1
+  - this method do not pass in any custom values when executing the helm command
+- kubectl create ns db
+- go to values schema
+- helm install -n db --values MariaDB-Custom-Values.yml my-mariadb bitnami/mariadb --version 19.0.1
+  - NAME: my-mariadb
+  - LAST DEPLOYED: Mon Jul 22 15:18:07 2024
+  - NAMESPACE: db
+  - STATUS: deployed
+  - REVISION: 1
+  - TEST SUITE: None
+  - NOTES:
+  - CHART NAME: mariadb
+  - CHART VERSION: 19.0.1
+  - APP VERSION: 11.4.2
+
+### ** Please be patient while the chart is being deployed **
+
+- Watch the deployment status using the command: kubectl get pods -w --namespace db -l app.kubernetes.io/instance=my-mariadb
+
+### Services:
+
+- echo Primary: my-mariadb.db.svc.cluster.local:3306
+- Administrator credentials:
+- Username: root
+- Password : $(kubectl get secret --namespace db my-mariadb -o jsonpath="{.data.mariadb-root-password}" | base64 -d)
+
+### To connect to your database:
+
+- Run a pod that you can use as a client:
+
+  - kubectl run my-mariadb-client --rm --tty -i --restart='Never' --image docker.io/bitnami/mariadb:11.4.2-debian-12-r0 --namespace db --command -- bash
+
+- To connect to primary service (read/write):
+  - mysql -h my-mariadb.db.svc.cluster.local -uroot -p helm-testdb
+
+## Upgrade Services using HELM
+
+- Obtain the password as described on the 'Administrator credentials' section and set the 'auth.rootPassword' parameter as shown below:
+  - ROOT_PASSWORD=$(kubectl get secret --namespace db my-mariadb -o jsonpath="{.data.mariadb-root-password}" | base64 -d) helm upgrade --namespace db my-mariadb oci://registry-1.docker.io/bitnamicharts/mariadb --set auth.rootPassword=$ROOT_PASSWORD
+  - helm upgrade -n db --values MariaDB-Custom-Values.yml my-mariadb bitnami/mariadb --version 19.0.0
+    - NAMESPACE: db
+    - STATUS: deployed
+    - REVISION: 2
+    - TEST SUITE: None
+    - NOTES:
+    - CHART NAME: mariadb
+    - CHART VERSION: 19.0.0
+    - APP VERSION: 11.4.2
+      helm upgrade -n db my-mariadb bitnami/mariadb --version 19.0.0 (this will upgrade the deployment using default values instead)
+- kubectl get pods
+- helm list -A NAME
+  - will see revision increase from 1 to 2
+
+## HELM Release Records
+
+- helm list -A
+- kubectl get secrets -n db
+  - my-mariadb Opaque 2 18m
+  - sh.helm.release.v1.my-mariadb.v1 helm.sh/release.v1 1 18m
+  - sh.helm.release.v1.my-mariadb.v2 helm.sh/release.v1 1 4m26s
+- helm uninstall my-mariadb -n db
+  - this will delete the past revisions state data
+- helm uninstall my-mariadb -n db --keep-history
+  - will keep the previous revision history
