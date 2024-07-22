@@ -1,84 +1,33 @@
-\***\*\*\*\*\*** Install Docker CE Edition \***\*\*\*\*\***
+# HELM: K8s Packaging Manager
 
-1. Uninstall old versions
+## HELM Intro
 
-sudo apt-get remove docker docker-engine docker.io containerd runc
+- Package Manager running on top of K8s
+- simplified micro services mgmt on k8s
 
-2. Update the apt package index
-
-sudo apt-get update
-
-sudo apt-get install \
- apt-transport-https \
- ca-certificates \
- curl \
- gnupg \
- lsb-release
-
-3. Add Docker’s official GPG key:
-   sudo mkdir -p /etc/apt/keyrings
-
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-4. Use the following command to set up the stable repository
-
-echo \
- "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
- $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-5. Install Docker Engine
-
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
-sudo apt install docker.io
-
-6. Verify the Docker version
-
-docker --version
-
-\***\*\*\*\*\*** Install KubeCtl \***\*\*\*\*\***
-
-1. Download the latest release
-
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-
-2. Install kubectl
-
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-
-3. Test to ensure the version you installed is up-to-date:
-
-kubectl version --client
-
-\***\*\*\*\*\*** Install MiniKube \***\*\*\*\*\***
-
-1. Download Binary
-
-curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-chmod +x minikube-linux-amd64
-
-2. Install Minikube
-
-sudo install minikube-linux-amd64 /usr/local/bin/minikube
-
-3. Verify Installation
-
-minikube version
-
-4. Start Kubernetes Cluster
-
-sudo apt install conntrack
-minikube start --driver=docker --force
-
-5. Get Cluster Information
-
-kubectl config view
-kubectl get nodes
-
-\***\*\*\*\*\*** Install Helm \***\*\*\*\*\***
-curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-sudo apt-get install apt-transport-https --yes
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-sudo apt-get update
-sudo apt-get install helm
-helm version
+- without helm
+  - will need to use yaml files to configure k8s workloads
+  - set up a new k8s workload -> create another yml file for that workload
+  - all yml files created for k8s are static -> no dynamic parsing of parameters
+  - error prone: humans need to edit the yml files
+  - no consistency with human created yml files during deployments (no checking of reused ports, deployment names etc)
+  - k8s do not maintain the revision history
+    - deployment with 4 apps
+      - upgrade v2 (only app a & d shld be upgraded)
+      - in k8s will edit and redeploy all the yml files
+- with helm
+  - create helm chart and let helm deploy the app to the cluster
+  - helm charts can be customized when deploying it on diff k8s clusters -> dynamic
+  - helm charts -> templates -> configuration yml files
+  - dynamic values can be supplied in an external file/s (input.yml) for diff env
+  - single click deployment (multi-apps deployment)
+  - reduce complexity of deployments
+  - more reproducible deployments & results
+  - ability to leverage k8s with single cli command
+  - easy rollback to previous versions of the app
+- helm charts & repos
+  - chart is collection of files that describe a related set of k8s resources
+  - can use helm cli commands on helm charts
+  - can get charts from bitnami or own repo
+- helm installation
+  - k8s must be installed & pre-configured for helm to be usable
