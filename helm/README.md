@@ -31,3 +31,111 @@
   - can get charts from bitnami or own repo
 - helm installation
   - k8s must be installed & pre-configured for helm to be usable
+
+## Next Level HELM
+
+- HELM Deployment Workflow
+  - Load Charts & Dependencies
+  - Parse values to yaml files
+  - Generate the yaml files (via templates)
+  - Parse yamls to kube object & validate
+  - Send validated yamls to k8s
+- Validate Resource before Actual Deployment (--dry-run flag)
+  - eg install mariadb (this will follow through step 4 before sending the validated yamls to k8s)
+    - helm install -n db --values MariaDB-Custom-Values.yml my-mariadb bitnami/mariadb --version 19.0.0 --dry-run
+      - first section: status -> pending-install
+      - second section: the list of yaml files needed to deploy for all the resources
+      - last section is the output of what the deployment will return if successful
+- Generate k8s deployable yaml using HELM
+  - helm template -n db --values MariaDB-Custom-Values.yml my-mariadb bitnami/mariadb --version 19.0.1
+    - this will not need the working k8s cluster
+    - will not validate the yaml files against the k8s cluster
+- Upgrade helm deployment
+  - helm upgrade -n db --values MariaDB-Custom-Values.yml my-mariadb bitnami/mariadb --version 19.0.1
+    - Release "my-mariadb" has been upgraded. Happy Helming!
+    - NAME: my-mariadb
+    - LAST DEPLOYED: Thu Jul 25 2024
+    - NAMESPACE: db
+    - STATUS: deployed
+    - REVISION: 2
+    - TEST SUITE: None
+    - NOTES:
+    - CHART NAME: mariadb
+    - CHART VERSION: 19.0.1
+    - APP VERSION: 11.4.2
+  - helm list -n db
+  - kubectl get secrets -n db
+    - my-mariadb Opaque 2
+    - sh.helm.release.v1.my-mariadb.v1 helm.sh/release.v1 1
+    - sh.helm.release.v1.my-mariadb.v2 helm.sh/release.v1 1
+  - the deployment state is being stored as a secret (cannot view the secret but can output to yaml)
+    - kubectl get secrets -n db sh.helm.release.v1.my-mariadb.v1 -o yaml
+      - will get a base64 encoded data of the release state
+- Get details about the helm deployment (reading from the secrets that helm used to store the release state)
+  - helm list -A
+  - helm get notes my-mariadb -n db (to get the release note of the deployment)
+  - helm get values my-mariadb -n db (to get the user supplied values after deployment)
+    - USER-SUPPLIED VALUES:
+      - auth:
+      - database: helm-testdb
+      - password: test-password-updated-after-upgrade
+      - rootPassword: someRootPassword
+      - username: helm-dbadmin
+  - helm get values my-mariadb -n db --revision 1 (to get specific revision user supplied values)
+  - helm get manifest my-mariadb -n db --revision 2 (to get the full manifest of the revision)
+- Rollback App using HELM
+  - helm history my-mariadb -n db
+    - REVISION UPDATED STATUS CHART APP VERSION DESCRIPTION
+    - 1 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Install complete
+    - 2 Thu Jul 25 2024 superseded mariadb-19.0.1 11.4.2 Upgrade complete
+    - 3 Thu Jul 25 2024 deployed mariadb-19.0.0 11.4.2 Upgrade complete
+  - helm rollback my-mariadb -n db 1 (rollback to revision 1)
+    - Rollback was a success! Happy Helming!
+  - helm history my-mariadb -n db
+    - REVISION UPDATED STATUS CHART APP VERSION DESCRIPTION
+    - 1 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Install complete
+    - 2 Thu Jul 25 2024 superseded mariadb-19.0.1 11.4.2 Upgrade complete
+    - 3 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Upgrade complete
+    - 4 Thu Jul 25 2024 deployed mariadb-19.0.0 11.4.2 Rollback to 1
+  - helm get values my-mariadb -n db --revision 4
+- Delete Deployment but keep history
+  - helm uninstall -n db my-mariadb --keep-history
+    - release "my-mariadb" uninstalled
+  - helm list -A (empty/no records)
+  - kubectl get secrets -n db (secrets still remain)
+    - NAME TYPE DATA AGE
+    - sh.helm.release.v1.my-mariadb.v1 helm.sh/release.v1 1 7h36m
+    - sh.helm.release.v1.my-mariadb.v2 helm.sh/release.v1 1 7h34m
+    - sh.helm.release.v1.my-mariadb.v3 helm.sh/release.v1 1 7m2s
+    - sh.helm.release.v1.my-mariadb.v4 helm.sh/release.v1 1 3m48s
+  - helm history my-mariadb -n db (helm history is still kept)
+    - REVISION UPDATED STATUS CHART APP VERSION DESCRIPTION
+    - 1 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Install complete
+    - 2 Thu Jul 25 2024 superseded mariadb-19.0.1 11.4.2 Upgrade complete
+    - 3 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Upgrade complete
+    - 4 Thu Jul 25 2024 uninstalled mariadb-19.0.0 11.4.2 Uninstallation complete
+- Rollback a deleted deployment
+  - helm rollback my-mariadb -n db 3
+    - Rollback was a success! Happy Helming!
+  - helm history my-mariadb -n db
+    - REVISION UPDATED STATUS CHART APP VERSION DESCRIPTION
+    - 1 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Install complete
+    - 2 Thu Jul 25 2024 superseded mariadb-19.0.1 11.4.2 Upgrade complete
+    - 3 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Upgrade complete
+    - 4 Thu Jul 25 2024 uninstalled mariadb-19.0.0 11.4.2 Uninstallation complete
+    - 5 Thu Jul 25 2024 deployed mariadb-19.0.0 11.4.2 Rollback to 3
+- Wait HELM Deployment for successful installation of all resources (--wait flag - helm will wait for default 5mins, --timeout to override the default 5mins timout)
+  - helm install my-mysql bitnami/mysql --version 11.1.13 --wait --timeout 10m
+    - --wait flag work with helm upgrade/install
+  - helm upgrade my-mysql bitnami/mysql --version 11.1.11 --wait --timeout 10m
+- Atomic (can use with --timeout) -> this will auto rollback to prev version if it is not coming up on the new deployment
+  - helm upgrade my-mysql bitnami/mysql --version 11.1.11 --atomic --set image.pullPolicy="someInvalidConfig"
+    - Error: UPGRADE FAILED: release my-mysql failed, and has been rolled back due to atomic being set: context deadline exceeded
+  - helm history my-mysql
+    - REVISION UPDATED STATUS CHART APP VERSION DESCRIPTION
+    - 1 Thu Jul 25 2024 superseded mysql-11.1.13 8.4.2 Install complete
+    - 2 Thu Jul 25 2024 superseded mysql-11.1.11 8.4.1 Upgrade complete
+    - 3 Thu Jul 25 2024 failed mysql-11.1.11 8.4.1 Upgrade "my-mysql" failed: context deadline exceeded
+    - 4 Thu Jul 25 2024 deployed mysql-11.1.11 8.4.1 Rollback to 2
+- Create HELM Charts
+  - Use HELM Template to create

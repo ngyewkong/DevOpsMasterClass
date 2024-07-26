@@ -24,7 +24,7 @@
 - helm repo add bitnami https://charts.bitnami.com/bitnami
 - helm install my-redis bitnami/redis --version 19.6.1
   - NAME: my-redis
-  - LAST DEPLOYED: Mon Jul 22 12:59:44 2024
+  - LAST DEPLOYED: Mon Jul 22 2024
   - NAMESPACE: default
   - STATUS: deployed
   - REVISION: 1
@@ -95,7 +95,7 @@
 - go to values schema
 - helm install -n db --values MariaDB-Custom-Values.yml my-mariadb bitnami/mariadb --version 19.0.1
   - NAME: my-mariadb
-  - LAST DEPLOYED: Mon Jul 22 15:18:07 2024
+  - LAST DEPLOYED: Mon Jul 22 2024
   - NAMESPACE: db
   - STATUS: deployed
   - REVISION: 1
