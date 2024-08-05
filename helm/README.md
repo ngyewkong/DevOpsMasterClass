@@ -138,4 +138,5 @@
     - 3 Thu Jul 25 2024 failed mysql-11.1.11 8.4.1 Upgrade "my-mysql" failed: context deadline exceeded
     - 4 Thu Jul 25 2024 deployed mysql-11.1.11 8.4.1 Rollback to 2
 - Create HELM Charts
-  - Use HELM Template to create
+  - Use HELM to create a new Chart
+    - helm create my_first_chart
