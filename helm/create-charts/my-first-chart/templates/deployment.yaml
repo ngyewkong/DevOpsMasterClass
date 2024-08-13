@@ -1,5 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
+
+{{- if .Values.customblock.author.enabled }}
+{{"Custom enabled Field is set to true" | nindent 4}}
+{{- else}}
+{{"Custom enabled is set to false" | nindent 4}}
+{{- end }}
+  {{ "some random text here - " }} {{ "HELM" }}
+  {{ .Values.customblock.author.name }}
+  {{ .Values.customblock.author.address }}
+  {{ .Values.customblock.author.email | default "using default as email is empty johndoe@email.com"}}
+  {{ .Values.customblock.author.email | default "using default as email is empty johndoe@email.com" | nindent 2}}
+  {{ .Values.customblock.author.email | default "using default as email is empty johndoe@email.com" | upper | nindent 4}}
+  {{ .Values.customblock.author.email | default "using default as email is empty johndoe@email.com" | upper | quote | nindent 8}}
+
+  {{ "Values from Chart" }}
+  {{ .Chart.AppVersion }}
+  {{ .Chart.Keywords }}
+  {{ .Chart.Maintainers }}
+
 metadata:
   name: {{ include "my-first-chart.fullname" . }}
   labels:
