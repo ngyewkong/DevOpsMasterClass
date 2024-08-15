@@ -46,3 +46,23 @@
   - both .Values.ingress.className & the second part are both true
 - {{- if or}}
 - {{- if ne}}
+
+## TypeCast Values to YAML in Templates
+
+- making array object to yaml format
+- {{- with .Values.customblock.author.company }}
+- company:
+- {{- toYaml . | nindent 4}}
+- {{- end}}
+  - will print out the array of company stored in values.yaml when running helm template
+  - company:
+    - MSFT
+    - GOOG
+    - AMZN
+    - TSLA
+    - META
+- {{- with}}
+- {{- else}} (do smth if the object is empty)
+- {{- end}}
+  - kind: Deployment
+  - Empty Array Passed In

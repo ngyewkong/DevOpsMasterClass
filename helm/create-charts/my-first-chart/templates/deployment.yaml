@@ -1,6 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 
+{{- with .Values.customblock.author.companies }}
+company:
+{{- toYaml . | nindent 8 }}
+{{- else }}
+{{"Empty Array Passed In" | nindent 4}}
+{{- end}}
 {{- if .Values.customblock.author.enabled }}
 {{"Custom enabled Field is set to true" | nindent 4}}
 {{- else}}

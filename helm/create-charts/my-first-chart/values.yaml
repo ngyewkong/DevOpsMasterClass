@@ -9,6 +9,13 @@ customblock:
     address: "SG"
     email:
     enabled: false # set a boolean key:value pair to ref for conditional
+    company: # set an array then use it to pass multiple values into deployment.yaml
+    - "MSFT"
+    - "GOOG"
+    - "AMZN"
+    - "TSLA"
+    - "META"
+    companies: {}
 
 replicaCount: 1
 
