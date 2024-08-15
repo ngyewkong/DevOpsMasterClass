@@ -1,12 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 
+{{ $inplaceVar := .Values.autoscaling.enabled }}
+{{- if $inplaceVar }}
+{{"inplace variable is true" | nindent 4}}
+{{- else}}
+{{"inplace variable is not set to true" | nindent 4}}
+{{- end}}
+
 {{- with .Values.customblock.author.companies }}
 company:
 {{- toYaml . | nindent 8 }}
 {{- else }}
 {{"Empty Array Passed In" | nindent 4}}
 {{- end}}
+
+{{- range .Values.customblock.author.company }}
+company:
+  - {{- . }}
+{{- end}}
+
+images:
+{{- range $key,$value := .Values.image}}
+  {{$key}}: {{$value | quote}}
+{{- end}}
+ 
 {{- if .Values.customblock.author.enabled }}
 {{"Custom enabled Field is set to true" | nindent 4}}
 {{- else}}

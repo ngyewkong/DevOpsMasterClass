@@ -66,3 +66,36 @@
 - {{- end}}
   - kind: Deployment
   - Empty Array Passed In
+
+## Variable in Templates
+
+- {{ $inplaceVar := true }}
+  - kind: Deployment
+  - inplace variable is true
+- {{ $inplaceVar := .Values.autoscaling.enabled }} -> can read from values.yaml to set the variable value
+  - kind: Deployment
+  - inplace variable is not set to true
+
+## Loops in Templates
+
+- range iterate over the list (different output from with)
+- {{- range .Values.customblock.author.company }}
+  - company:
+    - -MSFT
+  - company:
+    - -GOOG
+  - company:
+    - -AMZN
+  - company:
+    - -TSLA
+  - company:
+    - -META
+- range can iterate over dictionary/k-v pairs
+  - images:
+  - {{- range $key,$value := .Values.image}} -> rmb to assign the variable to the range iterator on the .Values.image object
+    - {{$key}}: {{$value | quote}}
+  - {{- end}}
+    - images:
+      - pullPolicy: "IfNotPresent"
+      - repository: "nginx"
+      - tag: ""
