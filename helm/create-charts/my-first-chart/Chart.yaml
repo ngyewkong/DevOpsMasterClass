@@ -35,7 +35,9 @@ dependencies:
 - name: mysql
   version: "11.1.15"
   repository: "https://charts.bitnami.com/bitnami"
+  condition: mysql.enabled # this ref from values.yaml file (true)
 
 - name: rabbitmq
   version: "14.6.6"
   repository: "https://charts.bitnami.com/bitnami"
+  condition: rabbitmq.enabled # this ref from values.yaml file (false)

@@ -17,7 +17,7 @@ customblock:
     - "META"
     companies: {}
 
-replicaCount: 1
+replicaCount: 3
 # setting a wrong value will not be picked up by helm validation commands (template, lint, install --dry-run)
 # replicaCount: "test"
 
@@ -113,3 +113,11 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# for mysql chart conditional dependency
+mysql:
+  enabled: true
+
+# for rabbitmq chart conditional dependency
+rabbitmq:
+  enabled: false
