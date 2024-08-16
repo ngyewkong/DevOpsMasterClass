@@ -90,3 +90,12 @@
       - parent-child-dep-mysql-headless ClusterIP None <none> 3306/TCP 3m56s
 
 ## Child to Parent Chart Data Exchange
+
+- read smth from child to parent
+- have to use "import-values" syntax in Chart.yaml
+  - import-values:
+    - child: image # to reference the image key from child chart
+    - parent: mysql_image # save the output to mysql_image which can be referenced in deployment.yaml
+- in deployment.yaml
+  - {{- .Values.mysql_image.repository | nindent 4 | quote }}
+    - kind: Deployment"\n bitnami/mysql"

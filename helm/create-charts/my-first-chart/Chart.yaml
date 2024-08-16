@@ -36,6 +36,10 @@ dependencies:
   version: "11.1.15"
   repository: "https://charts.bitnami.com/bitnami"
   condition: mysql.enabled # this ref from values.yaml file (true)
+  import-values:
+  - child: image # to reference the image key from child chart
+    parent: mysql_image # save the output to mysql_image which can be referenced in deployment.yaml
+    # .Values.mysql_image is the object referenced from child chart
 
 - name: rabbitmq
   version: "14.6.6"

@@ -45,6 +45,12 @@ images:
   {{ .Chart.Maintainers }}
 */}}
 
+{{- /* 
+using the child value stored in Chart.yaml mysql_image object
+referencing the repository key  
+*/}}
+{{- .Values.mysql_image.repository | nindent 4 | quote }}
+
 metadata:
   name: {{ include "my-first-chart.fullname" . }}
   labels:
