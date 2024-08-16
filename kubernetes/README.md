@@ -106,6 +106,7 @@
     - minikube version
     - sudo apt install conntrack
     - minikube start --force (on digital ocean)
+    - minikube start --driver qemu --network socket_vmnet (local minikube)
     - kubectl is now configured to use "minikube" cluster and "default" namespace by default
     - minikube status
     - kubectl config view (view the certificate, namespace, user, context)

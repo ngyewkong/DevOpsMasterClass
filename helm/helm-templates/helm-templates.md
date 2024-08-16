@@ -99,3 +99,56 @@
       - pullPolicy: "IfNotPresent"
       - repository: "nginx"
       - tag: ""
+
+## Template Validation
+
+- 3 commands to validate at different levels
+  - helm lint (syntax error)
+  - helm template (syntax error)
+  - helm --dry-run (syntax + compilation error)
+- case 1: missing chart name in Chart.yaml (comment out name key-value pair)
+  - helm template my-first-chart/
+    - Error: validation: chart.metadata.name is required
+  - helm lint my-first-chart
+    - ==> Linting my-first-chart
+    - [ERROR] Chart.yaml: name is required
+    - [INFO] Chart.yaml: icon is recommended
+    - [ERROR] templates/: validation: chart.metadata.name is required
+    - [ERROR] : unable to load chart
+    - validation: chart.metadata.name is required
+    - Error: 1 chart(s) linted, 1 chart(s) failed
+  - helm install test-validation-deployment my-first-chart/ --dry-run
+    - Error: INSTALLATION FAILED: validation: chart.metadata.name is required
+- case 2: incorrect syntax (missing one curly brace for action in deployment.yaml)
+  - helm template my-first-chart/
+    - Error: YAML parse error on my-first-chart/templates/deployment.yaml: error converting YAML to JSON: yaml: line 24: did not find expected key
+  - helm lint my-first-chart
+    - ==> Linting my-first-chart
+    - [INFO] Chart.yaml: icon is recommended
+    - [ERROR] templates/deployment.yaml: unable to parse YAML: error converting YAML to JSON: yaml: line 24: did not find expected key
+    - Error: 1 chart(s) linted, 1 chart(s) failed
+  - helm install test-validation-deployment my-first-chart/ --dry-run
+    - Error: INSTALLATION FAILED: Kubernetes cluster unreachable:
+- case 3: missing apiVersion in deployment.yaml
+  - helm template my-first-chart/ (no error during template)
+    - kind: Deployment
+  - helm lint my-first-chart (no error during linting)
+    - ==> Linting my-first-chart
+    - [INFO] Chart.yaml: icon is recommended
+    - 1 chart(s) linted, 0 chart(s) failed
+  - helm install test-validation-deployment my-first-chart/ --dry-run (error during install dryrun)
+    - Error: INSTALLATION FAILED: unable to build kubernetes objects from release manifest: error validating "": error validating data: apiVersion not set
+      - during dry-run, it is also validating the yaml obj with k8s to check if the obj is deployable or not
+- case 4: wrong type passed into key-value pair in values.yaml (not able to catch wrong values using any validation commands)
+  - helm template my-first-chart/ (no error during template)
+    - kind: Deployment
+  - helm lint my-first-chart (no error during linting)
+    - ==> Linting my-first-chart
+    - [INFO] Chart.yaml: icon is recommended
+    - 1 chart(s) linted, 0 chart(s) failed
+  - helm install test-validation-deployment my-first-chart/ --dry-run (no error during install dryrun)
+    - NAME: test-validation-deployment
+    - LAST DEPLOYED: Fri Aug 16
+    - NAMESPACE: default
+    - STATUS: pending-install
+    - REVISION: 1

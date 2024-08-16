@@ -17,7 +17,8 @@ customblock:
     - "META"
     companies: {}
 
-replicaCount: 1
+# replicaCount: 1
+replicaCount: "test"
 
 image:
   repository: nginx
