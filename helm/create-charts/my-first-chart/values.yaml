@@ -117,6 +117,13 @@ affinity: {}
 # for mysql chart conditional dependency
 mysql:
   enabled: true
+  auth: # this will pass the values from parent values.yaml to child dependency charts
+    database: "my-custom-db"
+    username: "customuser"
+    password: "testpassword"
+  primary: # refer to https://artifacthub.io/packages/helm/bitnami/mysql?modal=values&path=primary.service
+    service:
+      type: NodePort # this will change the default from ClusterIP to NodePort
 
 # for rabbitmq chart conditional dependency
 rabbitmq:

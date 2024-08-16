@@ -60,4 +60,33 @@
 
 ## Pass Values to Dependencies at Runtime
 
+- passing in parent values to child charts
+- add it to values.yaml (under myysql)
+  - eg. add db credentials in parent values.yaml and pass it to the child chart during install
+  - helm install parent-child-dep my-first-chart
+    - NAME: parent-child-dep
+    - LAST DEPLOYED: Fri Aug 16 21:45:36 2024
+    - NAMESPACE: default
+    - STATUS: deployed
+    - REVISION: 1
+  - kubectl get pods
+    - NAME READY STATUS RESTARTS AGE
+    - parent-child-dep-my-first-chart-69d4bcc99-cxr28 1/1 Running 0 2m9s
+    - parent-child-dep-my-first-chart-69d4bcc99-g9h6l 1/1 Running 0 2m9s
+    - parent-child-dep-my-first-chart-69d4bcc99-wltb8 1/1 Running 0 2m9s
+    - parent-child-dep-mysql-0 1/1 Running 0 2m9s
+  - kubectl get svc
+    - NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
+    - parent-child-dep-my-first-chart ClusterIP 10.102.103.42 <none> 80/TCP 2m11s
+    - parent-child-dep-mysql ClusterIP 10.108.33.65 <none> 3306/TCP 2m11s
+    - parent-child-dep-mysql-headless ClusterIP None <none> 3306/TCP 2m11s
+  - eg. add customization in values.yaml (change Network from ClusterIP to NodePort)
+    - helm uninstall parent-child-dep my-first-chart
+    - helm install parent-child-dep my-first-chart
+    - kubectl get svc (parent-child-dep-mysql should be NodePort type instead of ClusterIP)
+      - NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
+      - parent-child-dep-my-first-chart ClusterIP 10.98.114.220 <none> 80/TCP 3m56s
+      - parent-child-dep-mysql NodePort 10.107.43.240 <none> 3306:31085/TCP 3m56s
+      - parent-child-dep-mysql-headless ClusterIP None <none> 3306/TCP 3m56s
+
 ## Child to Parent Chart Data Exchange
