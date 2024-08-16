@@ -1,5 +1,14 @@
 # HELM Templates Syntax
 
+## Comments in Templates
+
+- Template Comments (for commenting out parts that use actions and require keywords to prevent rendering error)
+  - {{- /\*
+  - This is a comment.
+  - \*/}}
+- Yaml Comments (for normal comment)
+  - "#"
+
 ## Actions in Templates
 
 - whatever within {{ some_condition }} is an action which will be resolved at runtime

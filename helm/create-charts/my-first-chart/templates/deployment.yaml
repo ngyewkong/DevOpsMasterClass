@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 
+{{- /* comment out for fresh install with no error
 {{ $inplaceVar := .Values.autoscaling.enabled }}
 {{- if $inplaceVar }}
 {{"inplace variable is true" | nindent 4}}
@@ -42,6 +43,7 @@ images:
   {{ .Chart.AppVersion }}
   {{ .Chart.Keywords }}
   {{ .Chart.Maintainers }}
+*/}}
 
 metadata:
   name: {{ include "my-first-chart.fullname" . }}
