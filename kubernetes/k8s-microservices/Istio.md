@@ -26,3 +26,68 @@
   - Pilot: handles traffic redirection
   - Mixer: all the policy checks & telemetry is being handled by the Mixer
   - Istio-Auth: manage all the certificate that is required to manage the proxies
+- Istio uses a proxy to intercept all your network traffic, allowing a broad set of application-aware features based on configuration you set.
+  - The control plane takes your desired configuration, and its view of the services, and dynamically programs the proxy servers, updating them as the rules or the environment changes.
+  - The data plane is the communication between services. Without a service mesh, the network doesn’t understand the traffic being sent over, and can’t make any decisions based on what type of traffic it is, or who it is from or to.
+- Istio supports two data plane modes:
+  - sidecar mode, which deploys an Envoy proxy along with each pod that you start in your cluster, or running alongside services running on VMs.
+  - ambient mode, which uses a per-node Layer 4 proxy, and optionally a per-namespace Envoy proxy for Layer 7 features.
+
+## Installation of Istio on k8s cluster
+
+- need to set the cluster to larger memory & cpu resources (https://istio.io/latest/docs/setup/platform-setup/minikube/)
+  - minikube delete (delete existing minikube cluster as resources are too small)
+  - minikube start --driver qemu --network socket_vmnet --memory=4000mb --cpus=4 (using 4GB RAM & 4 cpus)
+  - minikube tunnel (open in another terminal to allow minikube to provide a load balancer for use by Istio)
+  - minikube status (ensure status is up or running)
+- install helm on newly setup cluster (follow instructions for VMs installation)
+- install Istio using HELM (https://istio.io/latest/docs/setup/install/helm/)
+  - helm repo add istio https://istio-release.storage.googleapis.com/charts
+  - helm repo update
+  - kubectl create namespace istio-system (for Istio components)
+  - Install the Istio base chart which contains cluster-wide Custom Resource Definitions (CRDs) which must be installed prior to the deployment of the Istio control plane
+    - helm install istio-base istio/base -n istio-system --set defaultRevision=default
+  - validate the CRD installation
+    - helm ls -n istio-system
+  - verify the CRDs have been committed
+    - kubectl get crds | grep 'istio.io\|certmanager.k8s.io'
+    - kubectl get crds | grep 'istio.io\|certmanager.k8s.io' | wc -l
+  - if using CNI plugin (due to company RBAC policies on elevated privileges)
+    - follow (https://istio.io/latest/docs/setup/additional-setup/cni/#installing-with-helm)
+  - Install the Istio discovery chart which deploys the istiod service
+    - helm install istiod istio/istiod -n istio-system --wait
+  - Verify the Istio discovery chart installation
+    - helm ls -n istio-system
+  - Get the status of the installed helm chart to ensure it is deployed
+    - helm status istiod -n istio-system
+  - Check istiod service is successfully installed and its pods are running
+    - kubectl get deployments -n istio-system --output wide
+      - NAME READY UP-TO-DATE AVAILABLE AGE CONTAINERS IMAGES SELECTOR
+      - istiod 1/1 1 1 3m59s discovery docker.io/istio/pilot:1.23.0 istio=pilot
+  - (Optional) Install an ingress gateway (follow this guide https://istio.io/latest/docs/setup/additional-setup/gateway/)
+    - kubectl create namespace istio-ingress
+    - helm install istio-ingress istio/gateway -n istio-ingress --wait
+  - to add grafana telemetry
+    - kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.23/samples/addons/grafana.yaml
+  - check all objects created (pod, service, deployment, replicaSet & HPA) in istio-system ns (should see istiod & grafana)
+    - kubectl get all -n istio-system
+  - check all objects created (pod, service, deployment, replicaSet & HPA) in istio-ingress ns (should see istio-ingress service which is the LoadBalancer)
+    - kubectl get all -n istio-ingress
+- Update Istio Configuration
+  - helm show values istio/gateway
+- Manual/Automatic Sidecar Envoy injection (https://istio.io/latest/docs/setup/additional-setup/sidecar-injection/)
+  - Automatic
+    - set the istio-injection=enabled label on a namespace and the injection webhook is enabled, any new pods that are created in that namespace will automatically have a sidecar added to them (add laberl to default ns)
+      - kubectl label ns default istio-injection=enabled
+    - verify labelling of namespace
+      - kubectl get ns -L istio-injection
+        - NAME STATUS AGE ISTIO-INJECTION
+        - default Active 67m enabled
+        - istio-ingress Active 32m
+        - istio-system Active 44m
+    - automatic injection occurs at the pod-level
+    - won’t see any change to the deployment itself
+    - check individual pods (via kubectl describe) to see the injected proxy.
+  - Manual
+    - manually inject a deployment, use istioctl kube-inject
+      - istioctl kube-inject -f samples/sleep/sleep.yaml | kubectl apply -f -
