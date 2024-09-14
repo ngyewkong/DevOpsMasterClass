@@ -91,3 +91,59 @@
   - Manual
     - manually inject a deployment, use istioctl kube-inject
       - istioctl kube-inject -f samples/sleep/sleep.yaml | kubectl apply -f -
+
+## Istio-enabled Application Demo
+
+- Without Istio: To control access to a cluster & routing to Services -> k8s uses Ingress Resources & Controllers (default)
+- With Istio: instead of Controller -> Istio mesh uses a Gateway which functions as a load balancer to handle incoming & outgoing HTTP/TCP connections
+- Gateway allows for monitoring & routing rules to be applied to traffic entering the mesh
+  - Config that determines traffic routing is defined as Virtual Service
+  - Each Virtual Service includes routing rules that match criteria with a specific protocol & destination
+- For the Demo -> to allow external traffic into the mesh & config routing to nodejs app -> need to create Istio Gateway & Virtual Service
+- Define Gateway Manifest file (node-istio.yaml)
+  - Gateway -> set to whatever gateway naming was used in the setup for istio in the k8s cluster (eg ingressgateway)
+  - Virtual Service
+- Deploy Istio Object Manifest
+- Create Manifest file for deployment (node-app.yaml)
+  - Application is a nodejs app
+    - Service Object is exposed on http 8080
+    - Deployment Object
+- After app Service & Deployment objects created -> Gateway & Virtual Service deployed -> generate some req to the app
+- View the associated data in Istio Grafana dashboards
+  - need to config Istio to expose Grafana so that can access the dashboards in client browser
+- Create Manifest file for Grafana (node-grafana.yaml)
+  - Gateway
+  - Virtual Service
+- Deploy Istio Onject Manifest
+  - kubectl apply -f node-grafana.yaml
+    - gateway.networking.istio.io/grafana-gateway created
+    - virtualservice.networking.istio.io/grafana-vs created
+- Verify grafana gateway & virtual service
+  - kubectl get gateway -n istio-system (see grafana-gateway & grafana-vs created)
+  - kubectl get vs -n istio-system (see grafana-vs created)
+  - kubectl describe gateway grafana-gateway -n istio-system
+- Verify Gateway in istio-system namespace
+  - kubectl get gateway -n istio-system
+  - kubectl get virtualservice -n istio-system
+- Create App on cluster
+  - kubectl apply -f node-app.yaml (deployed nodejs app to default ns)
+  - make sure the image is compatible (cpu architecture)
+- Get App pods
+  - kubectl get pods (see 3 pods initializing - within the pod have 2 containers (1 for app pod, 1 for the envoy proxy))
+- Describe App pods
+- Create App Gateway
+  - kubectl create -f node-istio.yaml
+- Check the app gateway in default namespace
+  - kubectl get gateway
+  - kubectl get vs
+- Check the services running in istio-system ns
+  - kubectl get svc -n istio-system
+    - NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
+    - grafana ClusterIP 10.102.132.33 <none> 3000/TCP 21d
+    - istiod ClusterIP 10.105.17.14 <none> 15010/TCP,15012/TCP,443/TCP,15014/TCP 21d
+- Port forward the svc to through the app gateway (node-app.yaml create the svc on port 8080, load balancer direct port 9000 to this svc) this will allow loaclhost:9000 to access the service on port 8080
+  - kubectl port-forward svc/nodejs 9000:8080
+  - http://localhost:9000/sharks will be valid
+- Access Grafana through the grafana service ip and port
+
+## Canary Deployment with Istio
