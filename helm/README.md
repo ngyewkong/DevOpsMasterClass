@@ -1,84 +1,142 @@
-\***\*\*\*\*\*** Install Docker CE Edition \***\*\*\*\*\***
+# HELM: K8s Packaging Manager
 
-1. Uninstall old versions
+## HELM Intro
 
-sudo apt-get remove docker docker-engine docker.io containerd runc
+- Package Manager running on top of K8s
+- simplified micro services mgmt on k8s
 
-2. Update the apt package index
+- without helm
+  - will need to use yaml files to configure k8s workloads
+  - set up a new k8s workload -> create another yml file for that workload
+  - all yml files created for k8s are static -> no dynamic parsing of parameters
+  - error prone: humans need to edit the yml files
+  - no consistency with human created yml files during deployments (no checking of reused ports, deployment names etc)
+  - k8s do not maintain the revision history
+    - deployment with 4 apps
+      - upgrade v2 (only app a & d shld be upgraded)
+      - in k8s will edit and redeploy all the yml files
+- with helm
+  - create helm chart and let helm deploy the app to the cluster
+  - helm charts can be customized when deploying it on diff k8s clusters -> dynamic
+  - helm charts -> templates -> configuration yml files
+  - dynamic values can be supplied in an external file/s (input.yml) for diff env
+  - single click deployment (multi-apps deployment)
+  - reduce complexity of deployments
+  - more reproducible deployments & results
+  - ability to leverage k8s with single cli command
+  - easy rollback to previous versions of the app
+- helm charts & repos
+  - chart is collection of files that describe a related set of k8s resources
+  - can use helm cli commands on helm charts
+  - can get charts from bitnami or own repo
+- helm installation
+  - k8s must be installed & pre-configured for helm to be usable
 
-sudo apt-get update
+## Next Level HELM
 
-sudo apt-get install \
- apt-transport-https \
- ca-certificates \
- curl \
- gnupg \
- lsb-release
-
-3. Add Docker’s official GPG key:
-   sudo mkdir -p /etc/apt/keyrings
-
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-4. Use the following command to set up the stable repository
-
-echo \
- "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
- $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-5. Install Docker Engine
-
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
-sudo apt install docker.io
-
-6. Verify the Docker version
-
-docker --version
-
-\***\*\*\*\*\*** Install KubeCtl \***\*\*\*\*\***
-
-1. Download the latest release
-
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-
-2. Install kubectl
-
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-
-3. Test to ensure the version you installed is up-to-date:
-
-kubectl version --client
-
-\***\*\*\*\*\*** Install MiniKube \***\*\*\*\*\***
-
-1. Download Binary
-
-curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-chmod +x minikube-linux-amd64
-
-2. Install Minikube
-
-sudo install minikube-linux-amd64 /usr/local/bin/minikube
-
-3. Verify Installation
-
-minikube version
-
-4. Start Kubernetes Cluster
-
-sudo apt install conntrack
-minikube start --driver=docker --force
-
-5. Get Cluster Information
-
-kubectl config view
-kubectl get nodes
-
-\***\*\*\*\*\*** Install Helm \***\*\*\*\*\***
-curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-sudo apt-get install apt-transport-https --yes
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-sudo apt-get update
-sudo apt-get install helm
-helm version
+- HELM Deployment Workflow
+  - Load Charts & Dependencies
+  - Parse values to yaml files
+  - Generate the yaml files (via templates)
+  - Parse yamls to kube object & validate
+  - Send validated yamls to k8s
+- Validate Resource before Actual Deployment (--dry-run flag)
+  - eg install mariadb (this will follow through step 4 before sending the validated yamls to k8s)
+    - helm install -n db --values MariaDB-Custom-Values.yml my-mariadb bitnami/mariadb --version 19.0.0 --dry-run
+      - first section: status -> pending-install
+      - second section: the list of yaml files needed to deploy for all the resources
+      - last section is the output of what the deployment will return if successful
+- Generate k8s deployable yaml using HELM
+  - helm template -n db --values MariaDB-Custom-Values.yml my-mariadb bitnami/mariadb --version 19.0.1
+    - this will not need the working k8s cluster
+    - will not validate the yaml files against the k8s cluster
+- Upgrade helm deployment
+  - helm upgrade -n db --values MariaDB-Custom-Values.yml my-mariadb bitnami/mariadb --version 19.0.1
+    - Release "my-mariadb" has been upgraded. Happy Helming!
+    - NAME: my-mariadb
+    - LAST DEPLOYED: Thu Jul 25 2024
+    - NAMESPACE: db
+    - STATUS: deployed
+    - REVISION: 2
+    - TEST SUITE: None
+    - NOTES:
+    - CHART NAME: mariadb
+    - CHART VERSION: 19.0.1
+    - APP VERSION: 11.4.2
+  - helm list -n db
+  - kubectl get secrets -n db
+    - my-mariadb Opaque 2
+    - sh.helm.release.v1.my-mariadb.v1 helm.sh/release.v1 1
+    - sh.helm.release.v1.my-mariadb.v2 helm.sh/release.v1 1
+  - the deployment state is being stored as a secret (cannot view the secret but can output to yaml)
+    - kubectl get secrets -n db sh.helm.release.v1.my-mariadb.v1 -o yaml
+      - will get a base64 encoded data of the release state
+- Get details about the helm deployment (reading from the secrets that helm used to store the release state)
+  - helm list -A
+  - helm get notes my-mariadb -n db (to get the release note of the deployment)
+  - helm get values my-mariadb -n db (to get the user supplied values after deployment)
+    - USER-SUPPLIED VALUES:
+      - auth:
+      - database: helm-testdb
+      - password: test-password-updated-after-upgrade
+      - rootPassword: someRootPassword
+      - username: helm-dbadmin
+  - helm get values my-mariadb -n db --revision 1 (to get specific revision user supplied values)
+  - helm get manifest my-mariadb -n db --revision 2 (to get the full manifest of the revision)
+- Rollback App using HELM
+  - helm history my-mariadb -n db
+    - REVISION UPDATED STATUS CHART APP VERSION DESCRIPTION
+    - 1 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Install complete
+    - 2 Thu Jul 25 2024 superseded mariadb-19.0.1 11.4.2 Upgrade complete
+    - 3 Thu Jul 25 2024 deployed mariadb-19.0.0 11.4.2 Upgrade complete
+  - helm rollback my-mariadb -n db 1 (rollback to revision 1)
+    - Rollback was a success! Happy Helming!
+  - helm history my-mariadb -n db
+    - REVISION UPDATED STATUS CHART APP VERSION DESCRIPTION
+    - 1 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Install complete
+    - 2 Thu Jul 25 2024 superseded mariadb-19.0.1 11.4.2 Upgrade complete
+    - 3 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Upgrade complete
+    - 4 Thu Jul 25 2024 deployed mariadb-19.0.0 11.4.2 Rollback to 1
+  - helm get values my-mariadb -n db --revision 4
+- Delete Deployment but keep history
+  - helm uninstall -n db my-mariadb --keep-history
+    - release "my-mariadb" uninstalled
+  - helm list -A (empty/no records)
+  - kubectl get secrets -n db (secrets still remain)
+    - NAME TYPE DATA AGE
+    - sh.helm.release.v1.my-mariadb.v1 helm.sh/release.v1 1 7h36m
+    - sh.helm.release.v1.my-mariadb.v2 helm.sh/release.v1 1 7h34m
+    - sh.helm.release.v1.my-mariadb.v3 helm.sh/release.v1 1 7m2s
+    - sh.helm.release.v1.my-mariadb.v4 helm.sh/release.v1 1 3m48s
+  - helm history my-mariadb -n db (helm history is still kept)
+    - REVISION UPDATED STATUS CHART APP VERSION DESCRIPTION
+    - 1 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Install complete
+    - 2 Thu Jul 25 2024 superseded mariadb-19.0.1 11.4.2 Upgrade complete
+    - 3 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Upgrade complete
+    - 4 Thu Jul 25 2024 uninstalled mariadb-19.0.0 11.4.2 Uninstallation complete
+- Rollback a deleted deployment
+  - helm rollback my-mariadb -n db 3
+    - Rollback was a success! Happy Helming!
+  - helm history my-mariadb -n db
+    - REVISION UPDATED STATUS CHART APP VERSION DESCRIPTION
+    - 1 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Install complete
+    - 2 Thu Jul 25 2024 superseded mariadb-19.0.1 11.4.2 Upgrade complete
+    - 3 Thu Jul 25 2024 superseded mariadb-19.0.0 11.4.2 Upgrade complete
+    - 4 Thu Jul 25 2024 uninstalled mariadb-19.0.0 11.4.2 Uninstallation complete
+    - 5 Thu Jul 25 2024 deployed mariadb-19.0.0 11.4.2 Rollback to 3
+- Wait HELM Deployment for successful installation of all resources (--wait flag - helm will wait for default 5mins, --timeout to override the default 5mins timout)
+  - helm install my-mysql bitnami/mysql --version 11.1.13 --wait --timeout 10m
+    - --wait flag work with helm upgrade/install
+  - helm upgrade my-mysql bitnami/mysql --version 11.1.11 --wait --timeout 10m
+- Atomic (can use with --timeout) -> this will auto rollback to prev version if it is not coming up on the new deployment
+  - helm upgrade my-mysql bitnami/mysql --version 11.1.11 --atomic --set image.pullPolicy="someInvalidConfig"
+    - Error: UPGRADE FAILED: release my-mysql failed, and has been rolled back due to atomic being set: context deadline exceeded
+  - helm history my-mysql
+    - REVISION UPDATED STATUS CHART APP VERSION DESCRIPTION
+    - 1 Thu Jul 25 2024 superseded mysql-11.1.13 8.4.2 Install complete
+    - 2 Thu Jul 25 2024 superseded mysql-11.1.11 8.4.1 Upgrade complete
+    - 3 Thu Jul 25 2024 failed mysql-11.1.11 8.4.1 Upgrade "my-mysql" failed: context deadline exceeded
+    - 4 Thu Jul 25 2024 deployed mysql-11.1.11 8.4.1 Rollback to 2
+- Create HELM Charts
+  - Use HELM to create a new Chart
+    - helm create my_first_chart

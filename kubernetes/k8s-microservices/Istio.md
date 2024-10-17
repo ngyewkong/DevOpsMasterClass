@@ -1,0 +1,149 @@
+# Istio
+
+## Introduction to Istio
+
+- microservice pattern
+  - client -> ingress network -> route to different pods (services)
+- challenge with microservices in k8s:
+  - no encryption of data communication microservice to microservice
+  - no load balancing
+  - no failover or auto-retries
+  - no routing decision (related to load balancing)
+  - no load metrics/logs happening in the microservice
+  - no access control to services in k8s cluster
+- need to use a proxy to achieve these features -> Istio service mesh
+- Istio service mesh provides several capabilities to services
+  - traffic monitoring
+  - access control
+  - discovery
+  - security
+  - resiliency
+- Istio deployed in k8s for micro services without any change in codebase for microservice
+- Underlying Istio deploys an Istio proxy (Istio Sidecar) next to each service
+- All of traffic is directed to the proxy which use policies to decide how, when or if that traffic should be redirected to the service
+- in each service, there will be an Istio envoy container in the service pod which handles HTTP, gRPC, TCP w/wo TLS protocols
+- in the upper layer -> control plane REST API layer it will have a Pilot, Mixer, Istio-Auth (Envoys are all connected to these 3 components)
+  - Pilot: handles traffic redirection
+  - Mixer: all the policy checks & telemetry is being handled by the Mixer
+  - Istio-Auth: manage all the certificate that is required to manage the proxies
+- Istio uses a proxy to intercept all your network traffic, allowing a broad set of application-aware features based on configuration you set.
+  - The control plane takes your desired configuration, and its view of the services, and dynamically programs the proxy servers, updating them as the rules or the environment changes.
+  - The data plane is the communication between services. Without a service mesh, the network doesn’t understand the traffic being sent over, and can’t make any decisions based on what type of traffic it is, or who it is from or to.
+- Istio supports two data plane modes:
+  - sidecar mode, which deploys an Envoy proxy along with each pod that you start in your cluster, or running alongside services running on VMs.
+  - ambient mode, which uses a per-node Layer 4 proxy, and optionally a per-namespace Envoy proxy for Layer 7 features.
+
+## Installation of Istio on k8s cluster
+
+- need to set the cluster to larger memory & cpu resources (https://istio.io/latest/docs/setup/platform-setup/minikube/)
+  - minikube delete (delete existing minikube cluster as resources are too small)
+  - minikube start --driver qemu --network socket_vmnet --memory=4000mb --cpus=4 (using 4GB RAM & 4 cpus)
+  - minikube tunnel (open in another terminal to allow minikube to provide a load balancer for use by Istio)
+  - minikube status (ensure status is up or running)
+- install helm on newly setup cluster (follow instructions for VMs installation)
+- install Istio using HELM (https://istio.io/latest/docs/setup/install/helm/)
+  - helm repo add istio https://istio-release.storage.googleapis.com/charts
+  - helm repo update
+  - kubectl create namespace istio-system (for Istio components)
+  - Install the Istio base chart which contains cluster-wide Custom Resource Definitions (CRDs) which must be installed prior to the deployment of the Istio control plane
+    - helm install istio-base istio/base -n istio-system --set defaultRevision=default
+  - validate the CRD installation
+    - helm ls -n istio-system
+  - verify the CRDs have been committed
+    - kubectl get crds | grep 'istio.io\|certmanager.k8s.io'
+    - kubectl get crds | grep 'istio.io\|certmanager.k8s.io' | wc -l
+  - if using CNI plugin (due to company RBAC policies on elevated privileges)
+    - follow (https://istio.io/latest/docs/setup/additional-setup/cni/#installing-with-helm)
+  - Install the Istio discovery chart which deploys the istiod service
+    - helm install istiod istio/istiod -n istio-system --wait
+  - Verify the Istio discovery chart installation
+    - helm ls -n istio-system
+  - Get the status of the installed helm chart to ensure it is deployed
+    - helm status istiod -n istio-system
+  - Check istiod service is successfully installed and its pods are running
+    - kubectl get deployments -n istio-system --output wide
+      - NAME READY UP-TO-DATE AVAILABLE AGE CONTAINERS IMAGES SELECTOR
+      - istiod 1/1 1 1 3m59s discovery docker.io/istio/pilot:1.23.0 istio=pilot
+  - (Optional) Install an ingress gateway (follow this guide https://istio.io/latest/docs/setup/additional-setup/gateway/)
+    - kubectl create namespace istio-ingress
+    - helm install istio-ingress istio/gateway -n istio-ingress --wait
+  - to add grafana telemetry
+    - kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.23/samples/addons/grafana.yaml
+  - check all objects created (pod, service, deployment, replicaSet & HPA) in istio-system ns (should see istiod & grafana)
+    - kubectl get all -n istio-system
+  - check all objects created (pod, service, deployment, replicaSet & HPA) in istio-ingress ns (should see istio-ingress service which is the LoadBalancer)
+    - kubectl get all -n istio-ingress
+- Update Istio Configuration
+  - helm show values istio/gateway
+- Manual/Automatic Sidecar Envoy injection (https://istio.io/latest/docs/setup/additional-setup/sidecar-injection/)
+  - Automatic
+    - set the istio-injection=enabled label on a namespace and the injection webhook is enabled, any new pods that are created in that namespace will automatically have a sidecar added to them (add laberl to default ns)
+      - kubectl label ns default istio-injection=enabled
+    - verify labelling of namespace
+      - kubectl get ns -L istio-injection
+        - NAME STATUS AGE ISTIO-INJECTION
+        - default Active 67m enabled
+        - istio-ingress Active 32m
+        - istio-system Active 44m
+    - automatic injection occurs at the pod-level
+    - won’t see any change to the deployment itself
+    - check individual pods (via kubectl describe) to see the injected proxy.
+  - Manual
+    - manually inject a deployment, use istioctl kube-inject
+      - istioctl kube-inject -f samples/sleep/sleep.yaml | kubectl apply -f -
+
+## Istio-enabled Application Demo
+
+- Without Istio: To control access to a cluster & routing to Services -> k8s uses Ingress Resources & Controllers (default)
+- With Istio: instead of Controller -> Istio mesh uses a Gateway which functions as a load balancer to handle incoming & outgoing HTTP/TCP connections
+- Gateway allows for monitoring & routing rules to be applied to traffic entering the mesh
+  - Config that determines traffic routing is defined as Virtual Service
+  - Each Virtual Service includes routing rules that match criteria with a specific protocol & destination
+- For the Demo -> to allow external traffic into the mesh & config routing to nodejs app -> need to create Istio Gateway & Virtual Service
+- Define Gateway Manifest file (node-istio.yaml)
+  - Gateway -> set to whatever gateway naming was used in the setup for istio in the k8s cluster (eg ingressgateway)
+  - Virtual Service
+- Deploy Istio Object Manifest
+- Create Manifest file for deployment (node-app.yaml)
+  - Application is a nodejs app
+    - Service Object is exposed on http 8080
+    - Deployment Object
+- After app Service & Deployment objects created -> Gateway & Virtual Service deployed -> generate some req to the app
+- View the associated data in Istio Grafana dashboards
+  - need to config Istio to expose Grafana so that can access the dashboards in client browser
+- Create Manifest file for Grafana (node-grafana.yaml)
+  - Gateway
+  - Virtual Service
+- Deploy Istio Onject Manifest
+  - kubectl apply -f node-grafana.yaml
+    - gateway.networking.istio.io/grafana-gateway created
+    - virtualservice.networking.istio.io/grafana-vs created
+- Verify grafana gateway & virtual service
+  - kubectl get gateway -n istio-system (see grafana-gateway & grafana-vs created)
+  - kubectl get vs -n istio-system (see grafana-vs created)
+  - kubectl describe gateway grafana-gateway -n istio-system
+- Verify Gateway in istio-system namespace
+  - kubectl get gateway -n istio-system
+  - kubectl get virtualservice -n istio-system
+- Create App on cluster
+  - kubectl apply -f node-app.yaml (deployed nodejs app to default ns)
+  - make sure the image is compatible (cpu architecture)
+- Get App pods
+  - kubectl get pods (see 3 pods initializing - within the pod have 2 containers (1 for app pod, 1 for the envoy proxy))
+- Describe App pods
+- Create App Gateway
+  - kubectl create -f node-istio.yaml
+- Check the app gateway in default namespace
+  - kubectl get gateway
+  - kubectl get vs
+- Check the services running in istio-system ns
+  - kubectl get svc -n istio-system
+    - NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
+    - grafana ClusterIP 10.102.132.33 <none> 3000/TCP 21d
+    - istiod ClusterIP 10.105.17.14 <none> 15010/TCP,15012/TCP,443/TCP,15014/TCP 21d
+- Port forward the svc to through the app gateway (node-app.yaml create the svc on port 8080, load balancer direct port 9000 to this svc) this will allow loaclhost:9000 to access the service on port 8080
+  - kubectl port-forward svc/nodejs 9000:8080
+  - http://localhost:9000/sharks will be valid
+- Access Grafana through the grafana service ip and port
+
+## Canary Deployment with Istio
