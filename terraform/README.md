@@ -38,6 +38,7 @@
   - terraform version (to check if terraform cli is installed)
 
 - Terraform Providers & Initialization
+
   - Providers are the cloud vendors (eg. AWS)
   - Providers are plugins used by Terraform to interact with cloud providers
   - Terraform configurations must declare which providers they require
@@ -54,3 +55,25 @@
   - Terraform creates hidden files (.terraform & .terraform.lock.hcl) in the initialized folder
     - .terraform dir contain the plugin for the providers
     - .terraform.lock.hcl shows the providers info
+
+- Setting up AWS to use Terraform
+
+  - Create IAM Admin User with all the necessary permissions
+  - Manage Security between Machine with Terraform and AWS
+    - create a IAM user and user group for admin access for terraform
+    - create a Security Group for EC2 and add the machine with terraform running IP address to whitelist
+  - will need to run terraform init if change working dir
+  - terraform plan -out somePlan.out to review
+    - Terraform will perform the following actions: aws_instance.vm-created-using-terraform will be created
+  - terraform apply to apply the createAWSInstance.tf in AWS
+    - can also run terraform apply "somePlan.out"
+    - need type yes to continue the deployment
+    - Creation complete after 17s (i-0e26c218cfdb7c65b) -> match with the created ec2
+    - Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+  - terraform destroy (will delete the deployment)
+    - Destroy complete! Resources: 1 destroyed.
+
+- Using env variables to pass in credentials to terraform
+  - need to use export & take note the key name is important
+    - export AWS_ACCESS_KEY_ID="YOUR_AWS_ACCESS_KEY"
+    - env | grep -i aws (to show the respective env variables for aws)
