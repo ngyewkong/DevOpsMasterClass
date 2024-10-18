@@ -74,6 +74,11 @@
     - Destroy complete! Resources: 1 destroyed.
 
 - Using env variables to pass in credentials to terraform
+
   - need to use export & take note the key name is important
     - export AWS_ACCESS_KEY_ID="YOUR_AWS_ACCESS_KEY"
     - env | grep -i aws (to show the respective env variables for aws)
+
+- use tags to set the name in the aws ec2 instances
+  - to set the dynamically the names of the instances (instead of static same names)
+    - Name = "terraform-demo-instances-${count.index}"
