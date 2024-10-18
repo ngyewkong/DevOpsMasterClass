@@ -95,6 +95,7 @@
   - after terraform destroy (the metadata part are deleted)
 
 - Variables in Terraform
+
   - to parameterise the deployments using Terraform
   - terraform input variables
     - defined using a variable block inside the .tf file
@@ -110,3 +111,10 @@
     - this will prompt for variables without default set
     - or running terraform plan -var AWS_ACCESS_KEY="YOUR_ACCES_KEY" -var AWS_SECRET_KEY="YOUR_SECRET_KEY"
     - or add a terraform.tfvars file to define the variables and its values or terraform apply -var-file="somefile.tfvars"
+
+- List and Map variables in Terraform
+  - list(another_type) need to be declared in variables.tf
+  - terraform plan -> will see the three security groups being added (but the security groups must be valid if not will fail)
+  - map(another_type) need to be declared in variables.tf
+  - terraform plan -> default take us-east-2 and give ami-05803413c51f242b7
+  - terraform plan -var AWS_REGION="us-west-1" -> give ami-0454207e5367abf01
