@@ -80,5 +80,33 @@
     - env | grep -i aws (to show the respective env variables for aws)
 
 - use tags to set the name in the aws ec2 instances
+
   - to set the dynamically the names of the instances (instead of static same names)
     - Name = "terraform-demo-instances-${count.index}"
+
+- Resource Tracking using Terraform State files
+
+  - changes made using terraform will be saved to the terraform state file (terraform.tfstate)
+  - stored as a flat file & stored in the same working directory but can be stored remotely
+  - helps terraform calculate deployment deltas.
+  - terraform plan can be used to created the new deployment plan
+  - if terraform state files is lost, have to do manually for creation, update or deletion of resources
+  - will contain all the metadata for the instances created by terraform
+  - after terraform destroy (the metadata part are deleted)
+
+- Variables in Terraform
+  - to parameterise the deployments using Terraform
+  - terraform input variables
+    - defined using a variable block inside the .tf file
+    - common location used is variables.tf
+    - eg of declaration of variable
+      - variable "varName" {
+      - type = string
+      - default = "eastus"
+      - }
+    - conditional input variables
+      - can have custom validation rules for an input variable by using a validation block
+  - will need a provider.tf (for the aws provider plugin), a variables.tf (to declare terraform input variables)
+    - this will prompt for variables without default set
+    - or running terraform plan -var AWS_ACCESS_KEY="YOUR_ACCES_KEY" -var AWS_SECRET_KEY="YOUR_SECRET_KEY"
+    - or add a terraform.tfvars file to define the variables and its values or terraform apply -var-file="somefile.tfvars"
