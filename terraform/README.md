@@ -113,8 +113,16 @@
     - or add a terraform.tfvars file to define the variables and its values or terraform apply -var-file="somefile.tfvars"
 
 - List and Map variables in Terraform
+
   - list(another_type) need to be declared in variables.tf
   - terraform plan -> will see the three security groups being added (but the security groups must be valid if not will fail)
   - map(another_type) need to be declared in variables.tf
   - terraform plan -> default take us-east-2 and give ami-05803413c51f242b7
   - terraform plan -var AWS_REGION="us-west-1" -> give ami-0454207e5367abf01
+
+- Provision Software with Terraform
+  - using custom image or ami
+  - Terraform Provisioner need to use SSH (Unix/Linux) or WinRM (windows)
+  - AWS needs to use SSH KeyPairs
+  - remote-exec to execute the script
+  - ssh-keygen to create the Public & Private keys
