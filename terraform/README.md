@@ -136,6 +136,7 @@
     - eg. data "aws_security_group" "myNewSG"
 
 - Output Attribute in Terraform
+
   - outputs in tf can be queried & retained
     - retain private IP addresses for further workflow
   - child module can use outputs to expose a subset of its resource attributes to a parent module
@@ -144,3 +145,37 @@
   - output "instance_ip_addr" {value = aws_instance_server.private_ip}
   - output is only rendered when terraform apply is executed (terraform plan will not render output)
   - outputs can also be used in scripts (local-exec or remote-exec provisioner)
+
+- Remote State in Terraform
+  - tf records information abt what infra it created in a terraform state file
+    - terraform.tfstate file
+    - terraform.tfstate.backup is the backup of the earlier statefile
+  - when "terraform apply" is executed -> backup is written and new state file is created
+  - complications with tfstate file
+    - if user goes to remove infra on the aws console without using terraform
+    - terraform will maintain the remote state (terraform apply -> will recreate the infra)
+    - users will need access to the same tfstate files to use terraform to update infra
+      - tfstate files will need to be in the shared location
+    - locking tfstate files
+      - without locking, when two team members are running terraform at the same time
+      - will run into race conditions as multiple tf processes make concurrent updates to the tfstate files
+      - resulting in conflicts, data loss or state file corruption
+    - isolating state files
+      - make sure the files of each env (pre-prod & prod) should be isolated
+      - so that file of pre-prod will not be used to run on prod env which will change the configuration of the prod env
+  - solutions to combat the three cons
+    - use version control system like git
+      - manual error due to lack of git pull
+      - no locking
+      - all data in tfstate files are stored in plain text (sensitive data will be on vcs once committed)
+    - use terraform built in remote backends
+      - once configured, terraform will auto load the state file from the backend everytime when plan or apply is executed and store the tfstate file in that backend after each apply
+      - remote backends natively support locking
+      - remote backends natively support encryption in transit and on disk
+      - eg store tfstate in aws s3 as remote backend
+      - terraform {backend "s3"}
+      - when using s3 as the remote backend -> rec to use aws configure instead of aws creds in variables to configure the key
+      - create s3 bucket to use as the remote backend & enable versioning
+      - aws configure requires aws cli
+        - sudo apt-get update
+        - sudo apt-get install aws-cli
