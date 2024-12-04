@@ -12,7 +12,7 @@ variable "AWS_REGION" {
 }
 
 variable "INSTANCE_COUNT" {
-  default = 3
+  default = 1
 }
 
 variable "Security_Group" {
