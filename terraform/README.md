@@ -121,8 +121,26 @@
   - terraform plan -var AWS_REGION="us-west-1" -> give ami-0454207e5367abf01
 
 - Provision Software with Terraform
+
   - using custom image or ami
   - Terraform Provisioner need to use SSH (Unix/Linux) or WinRM (windows)
   - AWS needs to use SSH KeyPairs
   - remote-exec to execute the script
   - ssh-keygen to create the Public & Private keys
+
+- Datasources in Terraform
+
+  - to retrieve aws parameters during runtime (dynamic vs static hardcode values)
+  - keyword data
+    - data "PROVIDER_PREDEFINED_FIELD" "Name_of_Data_for_reference"
+    - eg. data "aws_security_group" "myNewSG"
+
+- Output Attribute in Terraform
+  - outputs in tf can be queried & retained
+    - retain private IP addresses for further workflow
+  - child module can use outputs to expose a subset of its resource attributes to a parent module
+  - root module can use outputs to print certain values in the cli after executing terraform apply
+  - output value exported must be declared in an output block
+  - output "instance_ip_addr" {value = aws_instance_server.private_ip}
+  - output is only rendered when terraform apply is executed (terraform plan will not render output)
+  - outputs can also be used in scripts (local-exec or remote-exec provisioner)

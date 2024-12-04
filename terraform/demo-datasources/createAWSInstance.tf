@@ -45,4 +45,18 @@ resource "aws_instance" "vm-created-using-terraform" {
     Name = "terraform-demo-instances-${count.index}"
   }
 
+  provisioner "local-exec" {
+    // use ${self.private_ip} to get the actual private ip of the ec2 instances
+    // if use aws_instance.vm-created-using-terraform[0].private_ip will get static string so no actual private ip will be saved
+    command = "echo ${self.private_ip} >> us-east-ec2-private-ip.txt"
+  }
+
 }
+
+// output blocks to get the public ip of the ec2 instances
+// output block need to be outside of resource block
+// refer to https://registry.terraform.io/providers/hashicorp/aws/latest/docs to get the respective attributes
+output "public_ip" {
+  value = aws_instance.vm-created-using-terraform[0].public_ip
+}
+
