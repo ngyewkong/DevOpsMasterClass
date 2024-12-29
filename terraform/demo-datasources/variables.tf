@@ -17,7 +17,7 @@ variable "INSTANCE_COUNT" {
 
 variable "Security_Group" {
   type    = list(string)
-  default = ["sg-0c7de8c9df43291a2"]
+  default = ["sg-00ec6d705cd4c2404"]
 }
 
 variable "AMI" {
