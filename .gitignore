@@ -1,4 +1,4 @@
 **/*.env
 **/.terraform*
 **/terraform.tf*
-**/aws_ssh_key*
+**/*ssh_key*

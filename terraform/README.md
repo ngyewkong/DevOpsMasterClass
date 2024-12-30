@@ -127,6 +127,7 @@
   - AWS needs to use SSH KeyPairs
   - remote-exec to execute the script
   - ssh-keygen to create the Public & Private keys
+    - execute ssh-keygen -f secretKeyName
 
 - Datasources in Terraform
 
