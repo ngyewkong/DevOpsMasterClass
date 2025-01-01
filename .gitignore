@@ -1,0 +1,4 @@
+**/*.env
+**/.terraform*
+**/terraform.tf*
+**/*ssh_key*
