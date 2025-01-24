@@ -178,5 +178,6 @@
       - when using s3 as the remote backend -> rec to use aws configure instead of aws creds in variables to configure the key
       - create s3 bucket to use as the remote backend & enable versioning
       - aws configure requires aws cli
+        - ssh <public_ip_ec2> -l ubuntu -i <ssh_private_key>
         - sudo apt-get update
         - sudo apt-get install aws-cli
